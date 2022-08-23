@@ -362,7 +362,7 @@ barplot_variable_ranking_dataset0 <- function(data, title="", ytitle=""){
   ggplot(data, aes(fill=variable, y=value, x=importance_ranking)) +
     geom_bar(position="stack", stat="identity", color="white", size=0.2, width=0.8, 
              orientation="x") +
-    scale_fill_manual("Variable",
+    scale_fill_manual("Global ranking\nof variable importance",
       values=c("#ae2c87", "#ffa58c", "#8bdcbe", "#46BAC2", "#4378bf"),
                       limits=c("x3", "x2", "x5", "x4", "x1"), 
                       labels=c(TeX("$x^{(3)}$"), 
@@ -380,7 +380,7 @@ barplot_variable_ranking_dataset0 <- function(data, title="", ytitle=""){
               position = position_stack(vjust = 0.5), size = 3) + 
     labs(x=ytitle, y="Number of observations", title=title) +
     theme(plot.title = element_text(hjust = 0.5), axis.title.x = element_blank()) +
-    guides(colour = guide_legend(title.position = "top", title.hjust = 0.5))
+    guides(fill = guide_legend(title.position = "left", title.hjust = 0.5, title.vjust = 0.5))
 }
 
 d0_rsf_lime <- read.csv("results/exp2_survlime_orderings_rsf_dataset0.csv")
@@ -415,7 +415,7 @@ barplot_variable_ranking_dataset1 <- function(data, title="", ytitle=""){
   ggplot(data, aes(fill=variable, y=value, x=importance_ranking)) +
     geom_bar(position="stack", stat="identity", color="white", size=0.2, width=0.8, 
              orientation="x") +
-    scale_fill_manual("Variable",
+    scale_fill_manual("Global ranking\nof variable importance",
       values=c("#ae2c87", "#ffa58c","#8bdcbe", "#46BAC2", "#4378bf"),
                       limits=c("x2", "x5", "x1", "x3", "x4"), 
                       labels=c(TeX("$x^{(2)}$"), 
@@ -433,7 +433,7 @@ barplot_variable_ranking_dataset1 <- function(data, title="", ytitle=""){
               position = position_stack(vjust = 0.5), size = 3) + 
     labs(x=ytitle, y="number of observations", title=title) +
     theme(plot.title = element_text(hjust = 0.5), axis.title.x = element_blank()) +
-    guides(colour = guide_legend(title.position = "top", title.hjust = 0.5))
+    guides(fill = guide_legend(title.position = "left", title.hjust = 0.5))
 }
 
 
@@ -450,7 +450,6 @@ p2
 
 p <- ggarrange(p1, p2, ncol=2, nrow=1, common.legend = TRUE, legend="bottom") +
   theme(plot.margin = margin(0.1,0.2,0.1,0.1, "cm")) 
-p
 annotate_figure(p, top = text_grob("dataset1", 
                                    size = 14))
 
@@ -601,14 +600,14 @@ p1 <- ggplot(exp3_cph_orderings_lime, aes(fill=variable, y=value, x=importance_r
            orientation="x") +
   theme_minimal() +
   coord_flip() +
-  scale_fill_manual("Variable", values=c("#ae2c87", "#F05A71", "#ffa58c", "#c7f5bf", "#8bdcbe",   "#46BAC2", "#4378bf", "#3d42af"),
+  scale_fill_manual("Global ranking\nof variable importance", values=c("#ae2c87", "#F05A71", "#ffa58c", "#c7f5bf", "#8bdcbe",   "#46BAC2", "#4378bf", "#3d42af"),
                     limits=c("age at diagnosis", "nucleoli size",  "BAP1 mutation",   "mitotic rate per 1mm2",
                              "TIL density", "largest basal tumor diameter",  "ciliary body infiltration",  "sex")) + 
   geom_text(aes(label = value_plot), 
             position = position_stack(vjust = 0.5), size = 3) +
   labs(x="Importance ranking", y="number of observations", title="SurvLIME") +
   theme(plot.title = element_text(hjust = 0.5), axis.title.x = element_blank()) +
-  guides(colour = guide_legend(title.position = "top", title.hjust = 0.5)) + 
+  guides(fill = guide_legend(title.position = "left", title.hjust = 0.5)) + 
   scale_y_continuous(expand = c(0, 0), 
                      breaks=c(seq(0, 150, 10))) +
   scale_x_discrete(labels = importance_labels) 
@@ -626,14 +625,14 @@ p2 <- ggplot(exp3_cph_orderings_shap, aes(fill=variable, y=value, x=importance_r
            orientation="x") +
   theme_minimal() +
   coord_flip() +
-  scale_fill_manual("Variable", values=c("#ae2c87", "#F05A71", "#ffa58c", "#c7f5bf", "#8bdcbe",   "#46BAC2", "#4378bf", "#3d42af"),
+  scale_fill_manual("Global ranking\nof variable importance", values=c("#ae2c87", "#F05A71", "#ffa58c", "#c7f5bf", "#8bdcbe",   "#46BAC2", "#4378bf", "#3d42af"),
                     limits=c("age at diagnosis", "nucleoli size",  "BAP1 mutation",   "mitotic rate per 1mm2",
                              "TIL density", "largest basal tumor diameter",  "ciliary body infiltration",  "sex")) + 
   geom_text(aes(label = value_plot), 
             position = position_stack(vjust = 0.5), size = 3) +
   labs(x="", y="number of observations", title="SurvSHAP(t)") +
   theme(plot.title = element_text(hjust = 0.5), axis.title.x = element_blank()) +
-  guides(colour = guide_legend(title.position = "top", title.hjust = 0.5)) + 
+  guides(fill = guide_legend(title.position = "left", title.hjust = 0.5)) + 
   scale_y_continuous(expand = c(0, 0), 
                      breaks=c(seq(0, 150, 10))) +
   scale_x_discrete(labels = importance_labels) 
@@ -669,14 +668,14 @@ p1 <- ggplot(exp3_rsf_orderings_lime, aes(fill=variable, y=value, x=importance_r
            orientation="x") +
   theme_minimal() +
   coord_flip() +
-  scale_fill_manual("Variable", values=c("#ae2c87", "#F05A71", "#ffa58c", "#c7f5bf", "#8bdcbe",   "#46BAC2", "#4378bf", "#3d42af"),
+  scale_fill_manual("Global ranking\nof variable importance", values=c("#ae2c87", "#F05A71", "#ffa58c", "#c7f5bf", "#8bdcbe",   "#46BAC2", "#4378bf", "#3d42af"),
                     limits=c("nucleoli size",  "BAP1 mutation",   "age at diagnosis", "mitotic rate per 1mm2",
                              "largest basal tumor diameter",  "ciliary body infiltration",  "TIL density",  "sex")) + 
   geom_text(aes(label = value_plot), 
             position = position_stack(vjust = 0.5), size = 3) +
   labs(x="Importance ranking", y="number of observations", title="SurvLIME") +
   theme(plot.title = element_text(hjust = 0.5), axis.title.x = element_blank()) +
-  guides(colour = guide_legend(title.position = "top", title.hjust = 0.5)) + 
+  guides(fill = guide_legend(title.position = "left", title.hjust = 0.5)) + 
   scale_y_continuous(expand = c(0, 0), 
                      breaks=c(seq(0, 150, 10))) +
   scale_x_discrete(labels = importance_labels) 
@@ -692,14 +691,14 @@ p2 <- ggplot(exp3_rsf_orderings_shap, aes(fill=variable, y=value, x=importance_r
            orientation="x") +
   theme_minimal() +
   coord_flip() +
-  scale_fill_manual("Variable", values=c("#ae2c87", "#F05A71", "#ffa58c", "#c7f5bf", "#8bdcbe",   "#46BAC2", "#4378bf", "#3d42af"),
+  scale_fill_manual("Global ranking\nof variable importance", values=c("#ae2c87", "#F05A71", "#ffa58c", "#c7f5bf", "#8bdcbe",   "#46BAC2", "#4378bf", "#3d42af"),
                     limits=c("nucleoli size",  "BAP1 mutation",   "age at diagnosis", "mitotic rate per 1mm2",
                              "largest basal tumor diameter",  "ciliary body infiltration",  "TIL density",  "sex")) + 
   geom_text(aes(label = value_plot), 
             position = position_stack(vjust = 0.5), size = 3) +
   labs(x="", y="number of observations", title="SurvSHAP(t)") +
   theme(plot.title = element_text(hjust = 0.5), axis.title.x = element_blank()) +
-  guides(colour = guide_legend(title.position = "top", title.hjust = 0.5)) + 
+  guides(fill = guide_legend(title.position = "left", title.hjust = 0.5)) + 
   scale_y_continuous(expand = c(0, 0), 
                      breaks=c(seq(0, 150, 10))) +
   scale_x_discrete(labels = importance_labels) 
