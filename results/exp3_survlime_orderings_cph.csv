@@ -1,0 +1,65 @@
+,importance_ranking,variable,value
+0,1,BAP1 mutation,1
+1,2,BAP1 mutation,27
+2,3,BAP1 mutation,50
+3,4,BAP1 mutation,5
+4,5,BAP1 mutation,17
+5,6,BAP1 mutation,33
+6,7,BAP1 mutation,18
+7,8,BAP1 mutation,4
+8,1,nucleoli size,2
+9,2,nucleoli size,17
+10,3,nucleoli size,60
+11,4,nucleoli size,38
+12,5,nucleoli size,28
+13,6,nucleoli size,10
+14,7,nucleoli size,
+15,8,nucleoli size,
+16,1,age at diagnosis,41
+17,2,age at diagnosis,75
+18,3,age at diagnosis,23
+19,4,age at diagnosis,8
+20,5,age at diagnosis,5
+21,6,age at diagnosis,3
+22,7,age at diagnosis,
+23,8,age at diagnosis,
+24,1,mitotic rate per 1mm2,
+25,2,mitotic rate per 1mm2,
+26,3,mitotic rate per 1mm2,6
+27,4,mitotic rate per 1mm2,42
+28,5,mitotic rate per 1mm2,57
+29,6,mitotic rate per 1mm2,43
+30,7,mitotic rate per 1mm2,7
+31,8,mitotic rate per 1mm2,
+32,1,ciliary body infiltration,
+33,2,ciliary body infiltration,1
+34,3,ciliary body infiltration,3
+35,4,ciliary body infiltration,14
+36,5,ciliary body infiltration,19
+37,6,ciliary body infiltration,47
+38,7,ciliary body infiltration,62
+39,8,ciliary body infiltration,9
+40,1,largest basal tumor diameter,111
+41,2,largest basal tumor diameter,35
+42,3,largest basal tumor diameter,5
+43,4,largest basal tumor diameter,3
+44,5,largest basal tumor diameter,1
+45,6,largest basal tumor diameter,
+46,7,largest basal tumor diameter,
+47,8,largest basal tumor diameter,
+48,1,TIL density,
+49,2,TIL density,
+50,3,TIL density,
+51,4,TIL density,21
+52,5,TIL density,9
+53,6,TIL density,6
+54,7,TIL density,59
+55,8,TIL density,60
+56,1,sex,
+57,2,sex,
+58,3,sex,8
+59,4,sex,24
+60,5,sex,19
+61,6,sex,13
+62,7,sex,9
+63,8,sex,82
