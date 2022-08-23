@@ -3,6 +3,7 @@ This repository contains data and code for the article:
 
 M. Krzyziński, M. Spytek, H. Baniecki, P. Biecek. ***SurvSHAP(t): Time-dependent explanations of machine learning survival models***
 
+![](diagram.png)
 
 <hr/>
 
