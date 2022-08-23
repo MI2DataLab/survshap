@@ -13,7 +13,7 @@ Python version: 3.10.5
 - `survLIME.py` is the SurvLIME method implementation
 
 ### Data
-- `data_generation.R` is code for synthetic censored data generation (for Experiments 1 and 2)
+- `data_generation.R` is the code for synthetic censored data generation (for Experiments 1 and 2)
 - `data` directory contains the datasets used in experiments
 
 ### Experiments
@@ -21,5 +21,5 @@ Python version: 3.10.5
 - `results` directory contains results of the conducted experiments
 
 ### Plots
-- `plots.R` is code for creating Figures from the article
+- `plots.R` is the code for creating Figures from the article
 - `plots` directory contains Figures in `.pdf` format
