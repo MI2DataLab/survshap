@@ -2,11 +2,11 @@ def run_setup():
     from setuptools import setup
 
     setup(
-        name="SurvSHAP",
+        name="survshap",
         maintainer="Mateusz Krzyziński",
         author="Mateusz Krzyziński",
         author_email="mateusz.krzyzinski.stud@pw.edu.pl",
-        version="0.1.0",
+        version="0.1.1",
         description="SurvSHAP(t): Time-Dependent Explanations Of Machine Learning Survival Models",
         url="#",
         install_requires=[
@@ -19,7 +19,7 @@ def run_setup():
             "tqdm>=4.61.2",
             "statsmodels>=0.13.2",
         ],
-        packages=["SurvSHAP"],
+        packages=["survshap"],
         python_requires=">=3.7",
         include_package_data=True,
     )
