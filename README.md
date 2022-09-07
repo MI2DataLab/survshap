@@ -11,8 +11,8 @@ M. Krzyziński, M. Spytek, H. Baniecki, P. Biecek. ***SurvSHAP(t): Time-dependen
 Python version: 3.10.5
 
 ### Methods 
-- `SurvSHAP` directory contains the SurvSHAP(t) method implementation (NOTE: it can be installed as package - `setup.py`) 
-- `survLIME.py` is the SurvLIME method implementation
+- `survshap` directory contains the SurvSHAP(t) method implementation (NOTE: it can be installed as package - `setup.py`) 
+- `survlime.py` is the SurvLIME method implementation
 
 ### Data
 - `data_generation.R` is the code for synthetic censored data generation (for Experiments 1 and 2)
