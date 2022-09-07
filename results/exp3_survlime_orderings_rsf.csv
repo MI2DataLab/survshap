@@ -1,65 +1,65 @@
 ,importance_ranking,variable,value
-0,1,BAP1 mutation,58
-1,2,BAP1 mutation,14
-2,3,BAP1 mutation,11
-3,4,BAP1 mutation,
-4,5,BAP1 mutation,17
-5,6,BAP1 mutation,33
-6,7,BAP1 mutation,18
-7,8,BAP1 mutation,4
-8,1,nucleoli size,21
-9,2,nucleoli size,59
-10,3,nucleoli size,55
-11,4,nucleoli size,16
-12,5,nucleoli size,2
-13,6,nucleoli size,2
-14,7,nucleoli size,
-15,8,nucleoli size,
-16,1,age at diagnosis,66
-17,2,age at diagnosis,32
-18,3,age at diagnosis,17
-19,4,age at diagnosis,28
-20,5,age at diagnosis,8
-21,6,age at diagnosis,4
-22,7,age at diagnosis,
-23,8,age at diagnosis,
-24,1,mitotic rate per 1mm2,
-25,2,mitotic rate per 1mm2,4
-26,3,mitotic rate per 1mm2,19
-27,4,mitotic rate per 1mm2,37
-28,5,mitotic rate per 1mm2,51
-29,6,mitotic rate per 1mm2,35
-30,7,mitotic rate per 1mm2,8
-31,8,mitotic rate per 1mm2,1
-32,1,ciliary body infiltration,
-33,2,ciliary body infiltration,
-34,3,ciliary body infiltration,1
-35,4,ciliary body infiltration,11
-36,5,ciliary body infiltration,21
-37,6,ciliary body infiltration,55
-38,7,ciliary body infiltration,60
-39,8,ciliary body infiltration,7
-40,1,largest basal tumor diameter,10
-41,2,largest basal tumor diameter,44
-42,3,largest basal tumor diameter,49
-43,4,largest basal tumor diameter,34
-44,5,largest basal tumor diameter,13
-45,6,largest basal tumor diameter,3
-46,7,largest basal tumor diameter,2
-47,8,largest basal tumor diameter,
-48,1,TIL density,
-49,2,TIL density,
-50,3,TIL density,2
-51,4,TIL density,4
-52,5,TIL density,18
-53,6,TIL density,8
-54,7,TIL density,61
-55,8,TIL density,62
-56,1,sex,
-57,2,sex,2
-58,3,sex,1
-59,4,sex,25
-60,5,sex,25
-61,6,sex,15
-62,7,sex,6
-63,8,sex,81
+0,1,age,119
+1,2,age,72
+2,3,age,44
+3,4,age,40
+4,5,age,16
+5,6,age,4
+6,7,age,4
+7,8,age,
+8,1,creatinine_phosphokinase,
+9,2,creatinine_phosphokinase,1
+10,3,creatinine_phosphokinase,5
+11,4,creatinine_phosphokinase,9
+12,5,creatinine_phosphokinase,24
+13,6,creatinine_phosphokinase,109
+14,7,creatinine_phosphokinase,87
+15,8,creatinine_phosphokinase,64
+16,1,ejection_fraction,91
+17,2,ejection_fraction,56
+18,3,ejection_fraction,60
+19,4,ejection_fraction,54
+20,5,ejection_fraction,27
+21,6,ejection_fraction,7
+22,7,ejection_fraction,3
+23,8,ejection_fraction,1
+24,1,platelets,
+25,2,platelets,3
+26,3,platelets,8
+27,4,platelets,48
+28,5,platelets,157
+29,6,platelets,55
+30,7,platelets,25
+31,8,platelets,3
+32,1,serum_creatinine,11
+33,2,serum_creatinine,47
+34,3,serum_creatinine,141
+35,4,serum_creatinine,96
+36,5,serum_creatinine,3
+37,6,serum_creatinine,1
+38,7,serum_creatinine,
+39,8,serum_creatinine,
+40,1,serum_sodium,78
+41,2,serum_sodium,120
+42,3,serum_sodium,41
+43,4,serum_sodium,43
+44,5,serum_sodium,14
+45,6,serum_sodium,2
+46,7,serum_sodium,1
+47,8,serum_sodium,
+48,1,sex,
+49,2,sex,
+50,3,sex,
+51,4,sex,5
+52,5,sex,45
+53,6,sex,79
+54,7,sex,156
+55,8,sex,14
+56,1,smoking,
+57,2,smoking,
+58,3,smoking,
+59,4,smoking,4
+60,5,smoking,13
+61,6,smoking,42
+62,7,smoking,23
+63,8,smoking,217
