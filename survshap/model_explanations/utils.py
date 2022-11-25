@@ -11,6 +11,7 @@ from scipy.integrate import trapezoid
 
 def calculate_individual_explanations(
     explainer,
+    function_type,
     path,
     B,
     random_state,
@@ -23,6 +24,7 @@ def calculate_individual_explanations(
     concatenated_results = pd.DataFrame()
     for i in tqdm(range(len(explainer.data))):
         survSHAP_obj = PredictSurvSHAP(
+            function_type=function_type,
             path=path,
             B=B,
             calculation_method=calculation_method,

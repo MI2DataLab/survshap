@@ -12,6 +12,7 @@ from .utils import aggregate_change, calculate_individual_explanations
 class ModelSurvSHAP:
     def __init__(
         self,
+        function_type="sf",
         calculation_method="kernel",
         aggregation_method="integral",
         path="average",
@@ -19,6 +20,7 @@ class ModelSurvSHAP:
         random_state=None,
     ):
         self.explainer = None
+        self.function_type = function_type
         self.calculation_method = calculation_method
         self.aggregation_method = aggregation_method
         self.path = path
@@ -40,6 +42,7 @@ class ModelSurvSHAP:
             self.timestamps,
         ) = calculate_individual_explanations(
             explainer,
+            self.function_type,
             self.path,
             self.B,
             self.random_state,
