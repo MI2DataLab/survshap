@@ -12,7 +12,8 @@ Python version: 3.10.5
 
 ### Methods 
 - `survshap` directory contains the SurvSHAP(t) method implementation (NOTE: it can be installed as package - `setup.py`) 
-- `survlime.py` is the SurvLIME method implementation
+- `survlime.py` is the [SurvLIME](https://www.sciencedirect.com/science/article/abs/pii/S0950705120304044) method implementation
+- `survnam` directory contains the [SurvNAM](https://www.sciencedirect.com/science/article/abs/pii/S0893608021004949) method implementation (based on [Jia-Xiang Chengh implementation](https://github.com/jiaxiang-cheng/PyTorch-SurvNAM))
 
 ### Data
 - `data_generation.R` is the code for synthetic censored data generation (for Experiments 1 and 2)
