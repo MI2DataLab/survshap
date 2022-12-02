@@ -6,18 +6,62 @@ library(latex2exp)
 ### Experiment 1 
 
 # Figure 2 
-brier <- read.csv("results/exp1_model_brier_score.csv")
-p1 <- ggplot(brier, aes(x=time, y=brier_score, color = label, linetype=label)) +
+brier_exponential <- read.csv("results/exp1_exponential_model_brier_score.csv")
+p1_exponential <- ggplot(brier_exponential, aes(x=time, y=brier_score, color = label, linetype=label)) +
   geom_line() + 
   theme_minimal() +
   scale_color_manual(name="", values=c("#4378bf", "#ae2c87"), labels=c("CPH", "RSF")) + 
   scale_linetype_manual(name="", values=c(1, 5), labels=c("CPH", "RSF")) +
-  labs(x="Time", y="Brier score", title="Model performance") + 
-  theme(legend.position = c(0.25, 0.2),  plot.title = element_text(hjust = 0.5), legend.title = element_blank()) +
+  labs(x="Time", y="Brier score", title="EXP1_exponential") + 
+  theme(legend.position = c(0.25, 0.2),  plot.title = element_text(hjust = 0.5, size = 10), legend.title = element_blank()) +
   guides(colour = guide_legend(title.position = "top", title.hjust = 0.5)) +
   geom_hline(aes(yintercept=0.25), alpha=0.3) 
-p1
-ggsave("plots/exp1_brier_score.pdf", device="pdf", width=1300, height=1000, units="px")
+
+
+brier_weibull <- read.csv("results/exp1_weibull_model_brier_score.csv")
+p1_weibull <- ggplot(brier_weibull, aes(x=time, y=brier_score, color = label, linetype=label)) +
+  geom_line() + 
+  theme_minimal() +
+  scale_color_manual(name="", values=c("#4378bf", "#ae2c87"), labels=c("CPH", "RSF")) + 
+  scale_linetype_manual(name="", values=c(1, 5), labels=c("CPH", "RSF")) +
+  labs(x="Time", y="Brier score", title="EXP1_Weibull") + 
+  theme(legend.position = c(0.25, 0.2),  plot.title = element_text(hjust = 0.5, size = 10), legend.title = element_blank()) +
+  guides(colour = guide_legend(title.position = "top", title.hjust = 0.5)) +
+  geom_hline(aes(yintercept=0.25), alpha=0.3) 
+
+
+brier_complex <- read.csv("results/exp1_complex_model_brier_score.csv")
+p1_complex <- ggplot(brier_complex, aes(x=time, y=brier_score, color = label, linetype=label)) +
+  geom_line() + 
+  theme_minimal() +
+  scale_color_manual(name="", values=c("#4378bf", "#ae2c87"), labels=c("CPH", "RSF")) + 
+  scale_linetype_manual(name="", values=c(1, 5), labels=c("CPH", "RSF")) +
+  labs(x="Time", y="Brier score", title="EXP1_complex") + 
+  theme(legend.position = c(0.25, 0.2),  plot.title = element_text(hjust = 0.5, size = 10), legend.title = element_blank()) +
+  guides(colour = guide_legend(title.position = "top", title.hjust = 0.5)) +
+  geom_hline(aes(yintercept=0.25), alpha=0.3) 
+
+
+brier_non_td <- read.csv("results/exp1_non_td_model_brier_score.csv")
+p1_non_td <- ggplot(brier_non_td, aes(x=time, y=brier_score, color = label, linetype=label)) +
+  geom_line() + 
+  theme_minimal() +
+  scale_color_manual(name="", values=c("#4378bf", "#ae2c87"), labels=c("CPH", "RSF")) + 
+  scale_linetype_manual(name="", values=c(1, 5), labels=c("CPH", "RSF")) +
+  labs(x="Time", y="Brier score", title="EXP1_non_td") + 
+  theme(legend.position = c(0.25, 0.2),  plot.title = element_text(hjust = 0.5, size = 10), legend.title = element_blank()) +
+  guides(colour = guide_legend(title.position = "top", title.hjust = 0.5)) +
+  geom_hline(aes(yintercept=0.25), alpha=0.3) 
+
+
+p1 <- ggarrange(p1_exponential, p1_weibull, p1_complex, p1_non_td,
+          ncol=4, nrow=1, common.legend = TRUE, legend="bottom"
+          )
+
+annotate_figure(p1, top = text_grob("Model performance", 
+                                      color = "black",size = 14))
+
+ggsave("plots/exp1_brier_score.pdf", device="pdf", width=2700, height=800, units="px")
 
 
 # Figure 3
@@ -208,8 +252,8 @@ ggsave("plots/exp1_example_shap.pdf", device="pdf", width=2700, height=1200, uni
 
 
 # Figure 4
-local_accuracy <- read.csv("results/exp1_local_accuracy.csv")
-p1 <- ggplot(local_accuracy, aes(x=time, y=sigma, color = label, linetype=label)) +
+local_accuracy_exponential <- read.csv("results/exp1_exponential_local_accuracy.csv")
+p1_exponential <- ggplot(local_accuracy_exponential, aes(x=time, y=sigma, color = label, linetype=label)) +
   geom_line() + 
   theme_minimal() +
   scale_color_manual(name="", values=c("#4378bf", "#ae2c87"), labels=c("CPH", "RSF")) + 
@@ -218,11 +262,62 @@ p1 <- ggplot(local_accuracy, aes(x=time, y=sigma, color = label, linetype=label)
                      labels = c("0", 
                                 TeX("$1\\cdot 10^{-7}$"), 
                                 TeX("$2\\cdot 10^{-7}$"), TeX("$3\\cdot 10^{-7}$"))) +
-  labs(x="Time", y=TeX("\\sigma"), title="Local accuracy measure") + 
-  theme(legend.position = c(0.8, 0.2),  plot.title = element_text(hjust = 0.5), legend.title = element_blank()) +
+  labs(x="Time", y=TeX("\\sigma"), title="EXP1_exponential") + 
+  theme(legend.position = c(0.8, 0.2),  plot.title = element_text(hjust = 0.5, size = 10), legend.title = element_blank()) +
   guides(colour = guide_legend(title.position = "top", title.hjust = 0.5))
-p1
-ggsave("plots/exp1_local_accuracy.pdf", device="pdf", width=1300, height=1000, units="px")
+
+
+local_accuracy_weibull <- read.csv("results/exp1_weibull_local_accuracy.csv")
+p1_weibull <- ggplot(local_accuracy_weibull, aes(x=time, y=sigma, color = label, linetype=label)) +
+  geom_line() + 
+  theme_minimal() +
+  scale_color_manual(name="", values=c("#4378bf", "#ae2c87"), labels=c("CPH", "RSF")) + 
+  scale_linetype_manual(name="", values=c(1,5), labels=c("CPH", "RSF")) +
+  scale_y_continuous(limits = c(0, 3e-7), 
+                     labels = c("0", 
+                                TeX("$1\\cdot 10^{-7}$"), 
+                                TeX("$2\\cdot 10^{-7}$"), TeX("$3\\cdot 10^{-7}$"))) +
+  labs(x="Time", y=TeX("\\sigma"), title="EXP1_Weibull") + 
+  theme(legend.position = c(0.8, 0.2),  plot.title = element_text(hjust = 0.5, size = 10), legend.title = element_blank()) +
+  guides(colour = guide_legend(title.position = "top", title.hjust = 0.5))
+
+
+local_accuracy_complex <- read.csv("results/exp1_complex_local_accuracy.csv")
+p1_complex <- ggplot(local_accuracy_complex, aes(x=time, y=sigma, color = label, linetype=label)) +
+  geom_line() + 
+  theme_minimal() +
+  scale_color_manual(name="", values=c("#4378bf", "#ae2c87"), labels=c("CPH", "RSF")) + 
+  scale_linetype_manual(name="", values=c(1,5), labels=c("CPH", "RSF")) +
+  scale_y_continuous(limits = c(0, 3e-7), 
+                     labels = c("0", 
+                                TeX("$1\\cdot 10^{-7}$"), 
+                                TeX("$2\\cdot 10^{-7}$"), TeX("$3\\cdot 10^{-7}$"))) +
+  labs(x="Time", y=TeX("\\sigma"), title="EXP1_complex") + 
+  theme(legend.position = c(0.8, 0.2),  plot.title = element_text(hjust = 0.5, size = 10), legend.title = element_blank()) +
+  guides(colour = guide_legend(title.position = "top", title.hjust = 0.5))
+
+local_accuracy_non_td <- read.csv("results/exp1_non_td_local_accuracy.csv")
+p1_non_td <- ggplot(local_accuracy_non_td, aes(x=time, y=sigma, color = label, linetype=label)) +
+  geom_line() + 
+  theme_minimal() +
+  scale_color_manual(name="", values=c("#4378bf", "#ae2c87"), labels=c("CPH", "RSF")) + 
+  scale_linetype_manual(name="", values=c(1,5), labels=c("CPH", "RSF")) +
+  scale_y_continuous(limits = c(0, 3e-7), 
+                     labels = c("0", 
+                                TeX("$1\\cdot 10^{-7}$"), 
+                                TeX("$2\\cdot 10^{-7}$"), TeX("$3\\cdot 10^{-7}$"))) +
+  labs(x="Time", y=TeX("\\sigma"), title="EXP1_non_td") + 
+  theme(legend.position = c(0.8, 0.2),  plot.title = element_text(hjust = 0.5, size = 10), legend.title = element_blank()) +
+  guides(colour = guide_legend(title.position = "top", title.hjust = 0.5))
+
+p1 <- ggarrange(p1_exponential, p1_weibull, p1_complex, p1_non_td,
+                ncol=4, nrow=1, common.legend = TRUE, legend="bottom"
+)
+
+annotate_figure(p1, top = text_grob("Local accuracy measure", 
+                                    color = "black",size = 14))
+
+ggsave("plots/exp1_local_accuracy.pdf", device="pdf", width=2700, height=800, units="px")
 
 
 

@@ -1,40 +1,32 @@
 library(rootoned)
 
 # Experiment 1
-# data generated with different time-dependent effects (parametrized by rho)
-data_rho <- data.frame()
-survs_rho <- matrix(nrow=0, ncol=100)
-set.seed(42)
-rhos <- c(0.2, 0.4, 0.6, 0.8, 1)
-for (i in 1:5){
-  rho <- rhos[i]
-  
-  ## base hazard
-  h0 <- function(t){
-    exp(-17.8 + 6.5 * t - 11 * t ^ 0.5 * log(t) + 9.5 * t ^ 0.5)
-  }
-  
-  ## hazard
-  h <- function(t, x1, x2, x3, x4, x5){
-    h0(t) *exp((-0.9 + 0.1 * t + 0.9 * log(t)) * x1 * rho
-               + 0.5 * x2
-               - 0.2 * x3
-               + 0.1 * x4 
-               + 1e-6 * x5)
-  }
-  
-  ## CHF
-  inth <- function(t, x1, x2, x3, x4, x5){
-    as.numeric(integrate(h, 0, t, x1=x1, x2=x2, x3=x3, x4=x4, x5=x5)[1])
-  }
-  
-  ## SF
-  S <- function(t, x1, x2, x3, x4, x5){
-    exp(-inth(t, x1, x2, x3, x4, x5))
-  }
-  
-  
-  generate_dataset <- function(){
+# data generated with different time-dependent effects
+## hazard
+h <- function(t, x1, x2, x3, x4, x5, base_hazard_function){
+  base_hazard_function(t) * exp((-0.9 + 0.1 * t + 0.9 * log(t)) * x1 
+             + 0.5 * x2
+             - 0.2 * x3
+             + 0.1 * x4 
+             + 1e-6 * x5)
+}
+
+## CHF
+inth <- function(t, x1, x2, x3, x4, x5, base_hazard_function){
+  as.numeric(integrate(h, 0, t, x1=x1, x2=x2, x3=x3, x4=x4, x5=x5, base_hazard_function=base_hazard_function)[1])
+}
+
+## SF
+S <- function(t, x1, x2, x3, x4, x5, base_hazard_function){
+  exp(-inth(t, x1, x2, x3, x4, x5, base_hazard_function))
+}
+
+
+
+generate_dataset <- function(base_hazard_function, seed=42){
+    set.seed(seed)
+    data <- data.frame()
+    survs <- matrix(nrow=0, ncol=100)
     x1 <- rbinom(1000, 1, 0.5)
     x2 <- rbinom(1000, 1, 0.5)
     x3 <- rnorm(1000, 10, 2)
@@ -47,12 +39,12 @@ for (i in 1:5){
     to_drop <- numeric(0)
     for (i in 1:1000){
       u <- runif(1)
-      g <- function(t, x1, x2, x3, x4, x5){
-        S(t, x1, x2, x3, x4, x5) - u
+      g <- function(t, x1, x2, x3, x4, x5, base_hazard_function){
+        S(t, x1, x2, x3, x4, x5, base_hazard_function) - u
       }
       skip_to_next <- FALSE
       tryCatch({
-        generated_t[i] <- brent(g, 1e-16, 20, x1=x1[i], x2=x2[i], x3=x3[i], x4=x4[i], x5=x5[i])$root
+        generated_t[i] <- brent(g, 1e-16, 20, x1=x1[i], x2=x2[i], x3=x3[i], x4=x4[i], x5=x5[i], base_hazard_function=base_hazard_function)$root
       },
       error=function(cond){
         message(i)
@@ -60,29 +52,26 @@ for (i in 1:5){
         skip_to_next <<- TRUE}
       )
       if(skip_to_next) next
-      survs[i, ] <- sapply(seq(1e-9, 16, length.out=100), S, x1[i], x2[i], x3[i], x4[i], x5[i])
-      hazards[i, ] <- sapply(seq(1e-9, 16, length.out=100), h, x1[i], x2[i], x3[i], x4[i], x5[i])
+      # survs[i, ] <- sapply(seq(1e-9, 16, length.out=100), S, x1[i], x2[i], x3[i], x4[i], x5[i])
+      # hazards[i, ] <- sapply(seq(1e-9, 16, length.out=100), h, x1[i], x2[i], x3[i], x4[i], x5[i])
     }
     
     cl <- runif(1000, 11, 16)
     cr <- runif(1000, 0, 24)
     X$time <- pmin(generated_t, cl, cr)
     X$event <- as.numeric(generated_t < pmin(cl, cr))
-    list(X, survs, hazards, to_drop)
+    X
   }
   
-  res <- generate_dataset()
-  to_drop <- res[[4]]
-  survs <- res[[2]]
-  hazards <- res[[3]]
-  X <- res[[1]]
-  X$rho <- rho
-  data_rho <- rbind(data_rho, X)
-  survs_rho <- rbind(survs_rho, survs)
+
+
+
+## baseline hazard function -- EXP1_complex
+h0 <- function(t){
+  exp(-17.8 + 6.5 * t - 11 * t ^ 0.5 * log(t) + 9.5 * t ^ 0.5)
 }
 
-# selected rho = 1
-X <- data_rho[data_rho$rho == 1,]
+X <- generate_dataset(h0)
 
 # event/censoring times histogram
 c1 <- rgb(173,216,230,max = 255, alpha = 80, names = "lt.blue")
@@ -96,8 +85,86 @@ table(cut(X$time[X$event==1], breaks = c(0, 2, 4, 6, 8, 10, 12, 16)), X$x1[X$eve
 # survival curves
 fit <- survival::survfit(survival::Surv(time, event)~x1, data=X)
 survminer::ggsurvplot(fit, data=X, pval = TRUE)
+# write.csv(X, "data/exp1_data_complex.csv", row.names = FALSE)
 
-# write.csv(X, "data/exp1_data.csv", row.names = FALSE)
+
+
+## baseline hazard function -- EXP1_Weibull
+h0 <- function(t){
+  1.2 * 0.1 * t ^ (1.2 - 1)
+}
+
+X <- generate_dataset(h0)
+
+# event/censoring times histogram
+c1 <- rgb(173,216,230,max = 255, alpha = 80, names = "lt.blue")
+c2 <- rgb(255,192,203, max = 255, alpha = 80, names = "lt.pink")
+hist(X$time[X$event==1], col=c1)
+hist(X$time[X$event==0], col=c2, add=TRUE, breaks=0:16)
+
+# number of events vs x1 variable
+table(cut(X$time[X$event==1], breaks = c(0, 2, 4, 6, 8, 10, 12, 16)), X$x1[X$event==1])
+
+# survival curves
+fit <- survival::survfit(survival::Surv(time, event)~x1, data=X)
+survminer::ggsurvplot(fit, data=X, pval = TRUE)
+# write.csv(X, "data/exp1_data_exponential.csv", row.names = FALSE)
+
+
+
+## baseline hazard function -- EXP1_exponential
+h0 <- function(t){
+  0.08
+}
+
+X <- generate_dataset(h0)
+
+# event/censoring times histogram
+c1 <- rgb(173,216,230,max = 255, alpha = 80, names = "lt.blue")
+c2 <- rgb(255,192,203, max = 255, alpha = 80, names = "lt.pink")
+hist(X$time[X$event==1], col=c1)
+hist(X$time[X$event==0], col=c2, add=TRUE, breaks=0:16)
+
+# number of events vs x1 variable
+table(cut(X$time[X$event==1], breaks = c(0, 2, 4, 6, 8, 10, 12, 16)), X$x1[X$event==1])
+
+# survival curves
+fit <- survival::survfit(survival::Surv(time, event)~x1, data=X)
+survminer::ggsurvplot(fit, data=X, pval = TRUE)
+# write.csv(X, "data/exp1_data_exponential.csv", row.names = FALSE)
+
+
+
+## baseline hazard function -- EXP1_non_td
+h0 <- function(t){
+  exp(-17.8 + 6.5 * t - 11 * t ^ 0.5 * log(t) + 9.5 * t ^ 0.5)
+}
+
+h <- function(t, x1, x2, x3, x4, x5, base_hazard_function){
+  base_hazard_function(t) * exp(1 * x1 
+                                + 0.5 * x2
+                                - 0.2 * x3
+                                + 0.1 * x4 
+                                + 1e-6 * x5)
+}
+
+
+X <- generate_dataset(h0)
+
+# event/censoring times histogram
+c1 <- rgb(173,216,230,max = 255, alpha = 80, names = "lt.blue")
+c2 <- rgb(255,192,203, max = 255, alpha = 80, names = "lt.pink")
+hist(X$time[X$event==1], col=c1)
+hist(X$time[X$event==0], col=c2, add=TRUE, breaks=0:16)
+
+# number of events vs x1 variable
+table(cut(X$time[X$event==1], breaks = c(0, 2, 4, 6, 8, 10, 12, 16)), X$x1[X$event==1])
+
+# survival curves
+fit <- survival::survfit(survival::Surv(time, event)~x1, data=X)
+survminer::ggsurvplot(fit, data=X, pval = TRUE)
+# write.csv(X, "data/exp1_data_non_td.csv", row.names = FALSE)
+
 
 
 
