@@ -20,7 +20,7 @@ Python version: 3.10.5
 - `data` directory contains the datasets used in experiments
 
 ### Experiments
-- `*.ipynb` are notebooks with code of the conducted experiments 
+- `experiments` directory contains Jupyter Notebooks (`*.ipynb` files) with code of the conducted experiments 
 - `results` directory contains results of the conducted experiments
 
 ### Plots
