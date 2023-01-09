@@ -2,7 +2,18 @@
 
 This repository contains data and code for the article:
 
-M. Krzyziński, M. Spytek, H. Baniecki, P. Biecek. ***SurvSHAP(t): Time-dependent explanations of machine learning survival models***. Knowledge-Based Systems, 110234 (2023). DOI: https://doi.org/10.1016/j.knosys.2022.110234.
+M. Krzyziński, M. Spytek, H. Baniecki, P. Biecek. *SurvSHAP(t): Time-dependent explanations of machine learning survival models*. **Knowledge-Based Systems**, 262:110234, 2023. https://doi.org/10.1016/j.knosys.2022.110234
+
+```
+@article{,
+    title = {SurvSHAP(t): Time-dependent explanations of machine learning survival models},
+    author = {Mateusz Krzyziński and Mikołaj Spytek and Hubert Baniecki and Przemysław Biecek},
+    journal = {Knowledge-Based Systems},
+    volume = {262},
+    pages = {110234},
+    year = {2023}
+}
+```
 
 ![](diagram.png)
 
