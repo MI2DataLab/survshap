@@ -64,9 +64,7 @@ class SurvLIME:
                 np.isin(nel_aal_estimator[0], self.timestamps)
             ]
 
-        self.predicted_sf = explainer.model.predict_survival_function(new_observation)[
-            0
-        ](self.timestamps)
+        self.predicted_sf = explainer.predict(new_observation, "sf")[0](self.timestamps)
 
         new_observation_values = get_values(new_observation)
         if neighbourhood is None:
@@ -96,9 +94,7 @@ class SurvLIME:
             weights = np.sqrt(np.exp(-(distances**2) / (self.kernel_width**2)))
         else:
             weights = kernel(distances)
-        model_chfs = explainer.model.predict_cumulative_hazard_function(
-            pd.DataFrame(neighbourhood, columns=explainer.data.columns)
-        )
+        model_chfs = explainer.predict(pd.DataFrame(neighbourhood, columns=explainer.data.columns), "chf")
         model_chfs_vals = (
             np.array([chf(self.timestamps) for chf in model_chfs]) + 1e-32 + k
         )
@@ -131,9 +127,7 @@ class SurvLIME:
             method="Powell",
             options={"maxiter": self.max_iter},
         )
-        model_sf = explainer.model.predict_survival_function(
-            pd.DataFrame(neighbourhood, columns=explainer.data.columns)
-        )
+        model_sf = explainer.predict(pd.DataFrame(neighbourhood, columns=explainer.data.columns), "sf")
         self.neighbourhood_black_box_survival_functions = np.array(
             [sf(self.timestamps) for sf in model_sf]
         )
