@@ -12,20 +12,11 @@ def shap_kernel(
     explainer, new_observation, function_type, aggregation_method, timestamps
 ):
     p = new_observation.shape[1]
-    if function_type == "sf":
-        target_fun = explainer.model.predict_survival_function(new_observation)[
-            0
-        ]  # only one new_observation allowed
-        all_functions = explainer.model.predict_survival_function(explainer.data)
-    elif function_type == "chf":
-        target_fun = explainer.model.predict_cumulative_hazard_function(
-            new_observation
-        )[
-            0
-        ]  # only one new_observation allowed
-        all_functions = explainer.model.predict_cumulative_hazard_function(
-            explainer.data
-        )
+
+    # only one new_observation allowed
+    target_fun = explainer.predict(new_observation, function_type)[0] 
+    all_functions = explainer.predict(explainer.data, function_type)
+
     if timestamps is None:
         target_fun = target_fun.y
         all_functions_vals = [f.y for f in all_functions]
@@ -38,7 +29,7 @@ def shap_kernel(
     simplified_inputs = [list(z) for z in itertools.product(range(2), repeat=p)]
     kernel_weights = generate_shap_kernel_weights(simplified_inputs, p)
     shap_values, r2 = calculate_shap_values(
-        explainer.model,
+        explainer,
         function_type,
         baseline_f,
         explainer.data,
@@ -145,20 +136,11 @@ def shap_sampling(
     exact=False,
 ):
     p = new_observation.shape[1]
-    if function_type == "sf":
-        target_fun = explainer.model.predict_survival_function(new_observation)[
-            0
-        ]  # only one new_observation allowed
-        all_functions = explainer.model.predict_survival_function(explainer.data)
-    elif function_type == "chf":
-        target_fun = explainer.model.predict_cumulative_hazard_function(
-            new_observation
-        )[
-            0
-        ]  # only one new_observation allowed
-        all_functions = explainer.model.predict_cumulative_hazard_function(
-            explainer.data
-        )
+
+    # only one new_observation allowed
+    target_fun = explainer.predict(new_observation, function_type)[0] 
+    all_functions = explainer.predict(explainer.data, function_type)
+
     if timestamps is None:
         target_fun = target_fun.y
         all_functions_vals = [f.y for f in all_functions]
@@ -177,7 +159,7 @@ def shap_sampling(
     np.random.seed(random_state)
     result_list = [
         iterate_paths(
-            explainer.model,
+            explainer,
             function_type,
             explainer.data,
             new_observation,
@@ -219,7 +201,7 @@ def shap_sampling(
             result = pd.concat((result_average, result), axis=0)
         else:
             tmp = get_single_random_path(
-                explainer.model,
+                explainer,
                 function_type,
                 explainer.data,
                 new_observation,
@@ -295,10 +277,7 @@ def aggregate_change(average_changes, aggregation_method, timestamps):
 
 
 def calculate_mean_function(model, function_type, data, timestamps):
-    if function_type == "sf":
-        all_functions = model.predict_survival_function(data)
-    elif function_type == "chf":
-        all_functions = model.predict_cumulative_hazard_function(data)
+    all_functions = model.predict(data, function_type)
     all_function_vals = [f(timestamps) for f in all_functions]
     return np.mean(all_function_vals, axis=0)
 
