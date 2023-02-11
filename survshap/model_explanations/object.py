@@ -57,7 +57,7 @@ class ModelSurvSHAP:
         # based on original shap warning
         data_len = len(explainer.data)
         if data_len > 100:
-            warnings.warn("Using " + data_len + " background data samples could cause slower run times.\n" +
+            warnings.warn("Using " + str(data_len) + " background data samples could cause slower run times.\n" +
                           "Consider using a smaller sample.")
             
         if new_observations is None: 
