@@ -23,7 +23,7 @@ def calculate_individual_explanations(
 ):
     individual_explanations = []
     concatenated_results = pd.DataFrame()
-    for i in tqdm(range(len(explainer.data))):
+    for i in tqdm(range(len(new_observations))):
         survSHAP_obj = PredictSurvSHAP(
             function_type=function_type,
             path=path,
