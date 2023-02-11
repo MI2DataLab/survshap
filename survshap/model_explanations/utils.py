@@ -11,6 +11,7 @@ from scipy.integrate import trapezoid
 
 def calculate_individual_explanations(
     explainer,
+    new_observations,
     function_type,
     path,
     B,
@@ -31,11 +32,7 @@ def calculate_individual_explanations(
             aggregation_method=aggregation_method,
             random_state=random_state,
         )
-        if explainer.y is not None:
-            y_true_i = explainer.y[i]
-        else:
-            y_true_i = None
-        survSHAP_obj.fit(explainer, explainer.data.iloc[[i]], timestamps, y_true_i)
+        survSHAP_obj.fit(explainer, new_observations.iloc[[i]], timestamps)
         if save_individual_explanations:
             individual_explanations.append(survSHAP_obj)
         tmp_results = survSHAP_obj.result
