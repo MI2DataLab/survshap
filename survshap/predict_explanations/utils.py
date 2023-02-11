@@ -6,6 +6,44 @@ from tqdm import tqdm
 import math
 from scipy.integrate import trapezoid
 from sklearn.metrics import r2_score
+import shap
+import warnings
+
+def shap_kernel_explainer(explainer,
+                new_observation,
+                function_type,
+                aggregation_method,
+                timestamps):
+    
+    target_fun = explainer.predict(new_observation, function_type)[0] 
+    all_functions = explainer.predict(explainer.data, function_type)
+
+    if timestamps is None:
+        target_fun = target_fun.y
+        all_functions_vals = [f.y for f in all_functions]
+        timestamps = all_functions[0].x
+    else:
+        target_fun = target_fun(timestamps)
+        all_functions_vals = [f(timestamps) for f in all_functions]
+    baseline_fun = np.mean(all_functions_vals, axis=0)
+
+    def predict_function(X):
+        all_functions = explainer.predict(X, function_type)
+        preds = np.array([f(timestamps) for f in all_functions])
+        return preds
+
+    # as shap convert pd.DataFrame to np.array 
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=UserWarning)
+        exp = shap.KernelExplainer(predict_function, explainer.data)
+        res = exp.shap_values(new_observation)
+        
+    shap_values = np.vstack(res).T
+    
+    variable_names = explainer.data.columns
+    result = prepare_result_df(new_observation, variable_names, shap_values,
+                               timestamps, aggregation_method)
+    return result, target_fun, baseline_fun, timestamps
 
 
 def shap_kernel(
@@ -40,28 +78,8 @@ def shap_kernel(
     )
 
     variable_names = explainer.data.columns
-    new_observation_f = new_observation.apply(lambda x: nice_format(x.iloc[0]))
-    result_shap = pd.DataFrame(
-        shap_values, columns=[" = ".join(["t", str(time)]) for time in timestamps]
-    )
-    result_meta = pd.DataFrame(
-        {
-            "variable_str": [
-                " = ".join(pair) for pair in zip(variable_names, new_observation_f)
-            ],
-            "variable_name": variable_names,
-            "variable_value": new_observation.values.reshape(
-                -1,
-            ),
-            "B": 0,
-            "aggregated_change": aggregate_change(
-                result_shap, aggregation_method, timestamps
-            ),
-        }
-    )
-
-    result = pd.concat([result_meta, result_shap], axis=1)
-
+    result = prepare_result_df(new_observation, variable_names, shap_values, 
+                               timestamps, aggregation_method)
     return result, target_fun, baseline_f, timestamps, r2
 
 
@@ -264,6 +282,29 @@ def get_single_random_path(
 
     return pd.concat([result_meta, result_diffs], axis=1)
 
+
+def prepare_result_df(new_observation, variable_names, 
+                      shap_values, timestamps, aggregation_method):
+    new_observation_f = new_observation.apply(lambda x: nice_format(x.iloc[0]))
+    result_shap = pd.DataFrame(
+        shap_values, columns=[" = ".join(["t", str(time)]) for time in timestamps]
+        )
+    result_meta = pd.DataFrame(
+        {
+            "variable_str": [
+                " = ".join(pair) for pair in zip(variable_names, new_observation_f)
+            ],
+            "variable_name": variable_names,
+            "variable_value": new_observation.values.reshape(
+                -1,
+            ),
+            "B": 0,
+            "aggregated_change": aggregate_change(
+                result_shap, aggregation_method, timestamps
+            ),
+        }
+    )
+    return pd.concat([result_meta, result_shap], axis=1)
 
 def aggregate_change(average_changes, aggregation_method, timestamps):
     if aggregation_method == "sum_of_squares":

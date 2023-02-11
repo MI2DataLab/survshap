@@ -2,7 +2,7 @@ from .plot import predict_plot
 import pandas as pd
 import numpy as np
 import pandas as pd
-from .utils import check_new_observation, shap_kernel, shap_sampling
+from .utils import check_new_observation, shap_kernel, shap_sampling, shap_kernel_explainer
 
 
 class PredictSurvSHAP:
@@ -20,7 +20,7 @@ class PredictSurvSHAP:
 
         Args:
             function_type (str, optional): Either "sf" representing survival function or "chf" representing cumulative hazard function. Type of function to be evaluated for explanation. Defaults to "sf".
-            calculation_method (str, optional): Either "kernel" for kernelSHAP or "sampling" for sampling method. Chooses type of survSHAP calculation . Defaults to "kernel".
+            calculation_method (str, optional): Chooses type of survSHAP calculation. "shap" for shap.KernelExplainer, "kernel" for exact KernelSHAP, or "sampling" for sampling method. Defaults to "kernel".
             aggregation_method (str, optional): One of "sum_of_squares", "max_abs", "mean_abs" or "integral". Type of method  Defaults to "integral".
             path (list of int or str, optional): If specified, then attributions for this path will be plotted. Defaults to "average".
             B (int, optional): Number of random paths to calculate variable attributions. Defaults to 25.
@@ -98,6 +98,19 @@ class PredictSurvSHAP:
                 self.aggregation_method,
                 timestamps,
                 self.exact,
+            )
+        elif self.calculation_method == "shap":
+            (
+                self.result,
+                self.predicted_function,
+                self.baseline_function,
+                self.timestamps,
+            ) = shap_kernel_explainer(
+                explainer,
+                new_observation,
+                self.function,
+                self.aggregation_method,
+                timestamps,
             )
         else:
             raise ValueError("calculation_method should be 'kernel' or 'sampling'")

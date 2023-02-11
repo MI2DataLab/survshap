@@ -6,7 +6,7 @@ def run_setup():
         maintainer="Mateusz Krzyziński",
         author="Mateusz Krzyziński",
         author_email="mateusz.krzyzinski.stud@pw.edu.pl",
-        version="0.2.1",
+        version="0.3.0",
         description="SurvSHAP(t): Time-dependent explanations of machine learning survival models",
         url="#",
         install_requires=[
