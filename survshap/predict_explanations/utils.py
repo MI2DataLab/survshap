@@ -33,12 +33,12 @@ def shap_kernel_explainer(explainer,
         preds = np.array([f(timestamps) for f in all_functions])
         return preds
 
-    exp = shap.KernelExplainer(predict_function, explainer.data)
-
     # as shap convert pd.DataFrame to np.array 
     with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", category=UserWarning)
+        warnings.simplefilter("ignore", category=UserWarning)
+        exp = shap.KernelExplainer(predict_function, explainer.data)
         res = exp.shap_values(new_observation)
+        
     shap_values = np.vstack(res).T
     result_shap = pd.DataFrame(
         shap_values, columns=[" = ".join(["t", str(time)]) for time in timestamps]
