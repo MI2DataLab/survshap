@@ -23,7 +23,7 @@ class ModelSurvSHAP:
         
         Args:
             function_type (str, optional): Either "sf" representing survival function or "chf" representing cumulative hazard function. Type of function to be evaluated for explanation. Defaults to "sf".
-            calculation_method (str, optional): Either "kernel" for kernelSHAP or "sampling" for sampling method. Chooses type of survSHAP calculation . Defaults to "kernel".
+            calculation_method (str, optional): Chooses type of survSHAP calculation. "shap" for shap.KernelExplainer, "kernel" for exact KernelSHAP, or "sampling" for sampling method. Defaults to "kernel".
             aggregation_method (str, optional): One of "sum_of_squares", "max_abs", "mean_abs" or "integral". Type of method  Defaults to "integral".
             path (list of int or str, optional): If specified, then attributions for this path will be plotted. Defaults to "average".
             B (int, optional): Number of random paths to calculate variable attributions. Defaults to 25.
@@ -45,7 +45,7 @@ class ModelSurvSHAP:
     def _repr_html_(self):
         return self.result[self.result["B"] == 0]._repr_html_()
      
-    def fit(self, explainer, new_observations=None, timestamps=None, save_individual_explanations=True):
+    def fit(self, explainer, new_observations=None, timestamps=None, save_individual_explanations=True, **kwargs):
         """Calculate SurvSHAP(t) for many new observations and aggregate results.
 
         Args:
@@ -53,11 +53,12 @@ class ModelSurvSHAP:
             new_observations (pandas.DataFrame, optional): A DataFrame containing the observations to be explained. If None observations from explainer are explained. Defaults to None. 
             timestamps (numpy.Array, optional): An array of timestamps at which SurvSHAP(t) values should be calculated. Defaults to None.
             save_individual_explanations (bool, optional): Whether to save PredictSurvSHAP objects (explanations for individual observations). Defaults to True.
+            **kwargs (optional): Additional parameters passed for shap.KernelExplainer. 
         """
         # based on original shap warning
         data_len = len(explainer.data)
-        if data_len > 100:
-            warnings.warn("Using " + data_len + " background data samples could cause slower run times.\n" +
+        if data_len > 100 and self.calculation_method != "shap":
+            warnings.warn("Using " + str(data_len) + " background data samples could cause slower run times.\n" +
                           "Consider using a smaller sample.")
             
         if new_observations is None: 
@@ -78,6 +79,7 @@ class ModelSurvSHAP:
             self.aggregation_method,
             timestamps,
             save_individual_explanations,
+            **kwargs
         )
 
         names = explainer.y.dtype.names
