@@ -17,6 +17,8 @@ M. Krzyziński, M. Spytek, H. Baniecki, P. Biecek. *SurvSHAP(t): Time-dependent 
 
 ![](diagram.png)
 
+**NOTE:** SurvSHAP(t) and SurvLIME are also implemented in the [`survex`](https://github.com/ModelOriented/survex) R package 
+
 <hr/>
 
 Python version: 3.10.5
