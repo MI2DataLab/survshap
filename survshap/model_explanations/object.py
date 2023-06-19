@@ -18,6 +18,7 @@ class ModelSurvSHAP:
         path="average",
         B=25,
         random_state=None,
+        max_shap_value_inputs=np.inf
     ):
         self.explainer = None
         self.function_type = function_type
@@ -31,6 +32,7 @@ class ModelSurvSHAP:
         self.event_ind = None  # full y
         self.event_times = None  # full y
         self.full_result = None
+        self.max_shap_value_inputs = max_shap_value_inputs
 
     def _repr_html_(self):
         return self.result[self.result["B"] == 0]._repr_html_()
@@ -50,6 +52,7 @@ class ModelSurvSHAP:
             self.aggregation_method,
             timestamps,
             save_individual_explanations,
+            self.max_shap_value_inputs,
         )
 
         names = explainer.y.dtype.names

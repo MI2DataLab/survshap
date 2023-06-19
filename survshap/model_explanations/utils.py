@@ -19,6 +19,7 @@ def calculate_individual_explanations(
     aggregation_method,
     timestamps,
     save_individual_explanations,
+    max_shap_value_inputs=np.inf
 ):
     individual_explanations = []
     concatenated_results = pd.DataFrame()
@@ -30,6 +31,7 @@ def calculate_individual_explanations(
             calculation_method=calculation_method,
             aggregation_method=aggregation_method,
             random_state=random_state,
+            max_shap_value_inputs=max_shap_value_inputs
         )
         if explainer.y is not None:
             y_true_i = explainer.y[i]
