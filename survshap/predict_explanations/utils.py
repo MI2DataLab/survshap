@@ -177,7 +177,7 @@ def shap_sampling(
     if path is not None:
         if isinstance(path, str) and path == "average":
             average_changes = (
-                result.groupby("variable_str").mean().iloc[:, 2:]
+                result.groupby("variable_str").mean(numeric_only=True).iloc[:, 2:]
             )  # choose predictions, not variable value and B
             average_changes["aggregated_change"] = aggregate_change(
                 average_changes, aggregation_method, timestamps
