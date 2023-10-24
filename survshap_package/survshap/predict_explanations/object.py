@@ -2,7 +2,7 @@ from .plot import predict_plot
 import pandas as pd
 import numpy as np
 import pandas as pd
-from .utils import check_new_observation, shap_kernel, shap_sampling, shap_kernel_explainer
+from .utils import check_new_observation, shap_kernel, shap_sampling, shap_kernel_explainer, shap_tree_explainer
 
 
 class PredictSurvSHAP:
@@ -99,7 +99,7 @@ class PredictSurvSHAP:
                 timestamps,
                 self.exact,
             )
-        elif self.calculation_method == "shap":
+        elif self.calculation_method == "shap_kernel":
             (
                 self.result,
                 self.predicted_function,
@@ -112,8 +112,22 @@ class PredictSurvSHAP:
                 self.aggregation_method,
                 timestamps,
             )
+        elif self.calculation_method == "treeshap":
+            (
+                self.result,
+                self.predicted_function,
+                self.baseline_function,
+                self.timestamps,
+            ) = shap_tree_explainer(
+                explainer,
+                new_observation,
+                self.function,
+                self.aggregation_method,
+                timestamps,
+                treeshap=True,
+            )
         else:
-            raise ValueError("calculation_method should be 'kernel' or 'sampling'")
+            raise ValueError("calculation_method should be 'kernel', 'sampling', 'shap_kernel', or 'treeshap'")
 
         self.simplified_result = self.result[self.result["B"] == 0].iloc[:, 1:5]
 

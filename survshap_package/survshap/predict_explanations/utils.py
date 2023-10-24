@@ -6,16 +6,47 @@ from tqdm import tqdm
 import math
 from scipy.integrate import trapezoid
 from sklearn.metrics import r2_score
+from sksurv.ensemble import RandomSurvivalForest
 import shap
 import warnings
 
-def shap_kernel_explainer(explainer,
-                new_observation,
-                function_type,
-                aggregation_method,
-                timestamps):
-    
-    target_fun = explainer.predict(new_observation, function_type)[0] 
+
+def shap_tree_explainer(explainer, new_observation, function_type, aggregation_method, timestamps, **kwargs):
+    if timestamps is not None:
+        warnings.warn(
+            "timestamps are ignored for calculation_method = 'treeshap' \n SurvSHAP(t) values are calculated for explainer.model.unique_times_"
+        )
+    timestamps = explainer.model.unique_times_
+
+    if not isinstance(explainer.model, RandomSurvivalForest):
+        raise TypeError("explainer must be of class sksurv.ensemble.RandomSurvivalForest")
+
+    if function_type == "sf":
+        start_index = 1
+    elif function_type == "chf":
+        start_index = 0
+
+    all_function_vals = [f.y for f in explainer.predict(explainer.data, function_type)]
+    baseline_fun = np.mean(all_function_vals, axis=0)
+    target_fun = explainer.predict(new_observation, function_type)[0].y
+
+    n_estimators = len(explainer.model.estimators_)
+    tree_ensemble_model = {"trees": [estimator.tree_ for estimator in explainer.model.estimators_]}
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=UserWarning)
+        exp = shap.TreeExplainer(tree_ensemble_model, explainer.data, **kwargs)
+        res = exp.shap_values(new_observation)
+
+    shap_values = np.vstack(res[start_index::2]).T / n_estimators
+
+    variable_names = explainer.data.columns
+    result = prepare_result_df(new_observation, variable_names, shap_values, timestamps, aggregation_method)
+    return result, target_fun, baseline_fun, timestamps
+
+
+def shap_kernel_explainer(explainer, new_observation, function_type, aggregation_method, timestamps, **kwargs):
+    target_fun = explainer.predict(new_observation, function_type)[0]
     all_functions = explainer.predict(explainer.data, function_type)
 
     if timestamps is None:
@@ -32,27 +63,24 @@ def shap_kernel_explainer(explainer,
         preds = np.array([f(timestamps) for f in all_functions])
         return preds
 
-    # as shap convert pd.DataFrame to np.array 
+    # as shap convert pd.DataFrame to np.array
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", category=UserWarning)
-        exp = shap.KernelExplainer(predict_function, explainer.data)
+        exp = shap.KernelExplainer(predict_function, explainer.data, **kwargs)
         res = exp.shap_values(new_observation)
-        
+
     shap_values = np.vstack(res).T
-    
+
     variable_names = explainer.data.columns
-    result = prepare_result_df(new_observation, variable_names, shap_values,
-                               timestamps, aggregation_method)
+    result = prepare_result_df(new_observation, variable_names, shap_values, timestamps, aggregation_method)
     return result, target_fun, baseline_fun, timestamps
 
 
-def shap_kernel(
-    explainer, new_observation, function_type, aggregation_method, timestamps
-):
+def shap_kernel(explainer, new_observation, function_type, aggregation_method, timestamps):
     p = new_observation.shape[1]
 
     # only one new_observation allowed
-    target_fun = explainer.predict(new_observation, function_type)[0] 
+    target_fun = explainer.predict(new_observation, function_type)[0]
     all_functions = explainer.predict(explainer.data, function_type)
 
     if timestamps is None:
@@ -78,8 +106,7 @@ def shap_kernel(
     )
 
     variable_names = explainer.data.columns
-    result = prepare_result_df(new_observation, variable_names, shap_values, 
-                               timestamps, aggregation_method)
+    result = prepare_result_df(new_observation, variable_names, shap_values, timestamps, aggregation_method)
     return result, target_fun, baseline_f, timestamps, r2
 
 
@@ -101,17 +128,11 @@ def generate_shap_kernel_weights(simplified_inputs, num_variables):
     return weights
 
 
-def make_prediction_for_simplified_input(
-    model, function_type, data, simplified_inputs, new_observation, timestamps
-):
+def make_prediction_for_simplified_input(model, function_type, data, simplified_inputs, new_observation, timestamps):
     preds = np.zeros((len(simplified_inputs), len(timestamps)))
     for i, mask in enumerate(simplified_inputs):
-        X_tmp = pd.DataFrame(
-            np.where(mask, new_observation, data), columns=data.columns
-        )
-        preds[
-            i,
-        ] = calculate_mean_function(model, function_type, X_tmp, timestamps)
+        X_tmp = pd.DataFrame(np.where(mask, new_observation, data), columns=data.columns)
+        preds[i,] = calculate_mean_function(model, function_type, X_tmp, timestamps)
     return preds
 
 
@@ -129,9 +150,7 @@ def calculate_shap_values(
     X = np.array(simplified_inputs)
     R = np.linalg.inv(X.T @ W @ X) @ (X.T @ W)
     y = (
-        make_prediction_for_simplified_input(
-            model, function_type, data, simplified_inputs, new_observation, timestamps
-        )
+        make_prediction_for_simplified_input(model, function_type, data, simplified_inputs, new_observation, timestamps)
         - avg_function
     )
     shap_values = R @ y
@@ -156,7 +175,7 @@ def shap_sampling(
     p = new_observation.shape[1]
 
     # only one new_observation allowed
-    target_fun = explainer.predict(new_observation, function_type)[0] 
+    target_fun = explainer.predict(new_observation, function_type)[0]
     all_functions = explainer.predict(explainer.data, function_type)
 
     if timestamps is None:
@@ -197,25 +216,12 @@ def shap_sampling(
             average_changes = (
                 result.groupby("variable_str").mean(numeric_only=True).iloc[:, 2:]
             )  # choose predictions, not variable value and B
-            average_changes["aggregated_change"] = aggregate_change(
-                average_changes, aggregation_method, timestamps
-            )
-            average_changes = average_changes.sort_values(
-                "aggregated_change", ascending=False
-            )
-            result_average = (
-                result_list[0]
-                .set_index("variable_str")
-                .reindex(average_changes.index)
-                .reset_index()
-            )
+            average_changes["aggregated_change"] = aggregate_change(average_changes, aggregation_method, timestamps)
+            average_changes = average_changes.sort_values("aggregated_change", ascending=False)
+            result_average = result_list[0].set_index("variable_str").reindex(average_changes.index).reset_index()
             result_average = result_average.assign(B=0)
-            result_average.iloc[:, 4:] = average_changes.drop(
-                "aggregated_change", axis=1
-            ).values
-            result_average.insert(
-                4, "aggregated_change", average_changes["aggregated_change"].values
-            )
+            result_average.iloc[:, 4:] = average_changes.drop("aggregated_change", axis=1).values
+            result_average.insert(4, "aggregated_change", average_changes["aggregated_change"].values)
             result = pd.concat((result_average, result), axis=0)
         else:
             tmp = get_single_random_path(
@@ -232,46 +238,32 @@ def shap_sampling(
     return result, target_fun, baseline_f, timestamps
 
 
-def iterate_paths(
-    model, function_type, data, new_observation, timestamps, p, b, rng, path
-):
+def iterate_paths(model, function_type, data, new_observation, timestamps, p, b, rng, path):
     if path is None:
         random_path = rng.choice(np.arange(p), p, replace=False)
     else:
         random_path = path
-    return get_single_random_path(
-        model, function_type, data, new_observation, timestamps, random_path, b
-    )
+    return get_single_random_path(model, function_type, data, new_observation, timestamps, random_path, b)
 
 
-def get_single_random_path(
-    model, function_type, data, new_observation, timestamps, random_path, b
-):
+def get_single_random_path(model, function_type, data, new_observation, timestamps, random_path, b):
     current_data = deepcopy(data)
     yhats = [None] * (len(random_path) + 1)
     yhats[0] = calculate_mean_function(model, function_type, current_data, timestamps)
     for i, candidate in enumerate(random_path):
         current_data.iloc[:, candidate] = new_observation.iloc[0, candidate]
-        yhats[i + 1] = calculate_mean_function(
-            model, function_type, current_data, timestamps
-        )
+        yhats[i + 1] = calculate_mean_function(model, function_type, current_data, timestamps)
 
     diffs = np.diff(yhats, axis=0)
 
     variable_names = data.columns[random_path]
 
-    new_observation_f = new_observation.loc[:, variable_names].apply(
-        lambda x: nice_format(x.iloc[0])
-    )
+    new_observation_f = new_observation.loc[:, variable_names].apply(lambda x: nice_format(x.iloc[0]))
 
-    result_diffs = pd.DataFrame(
-        diffs.tolist(), columns=[" = ".join(["t", str(time)]) for time in timestamps]
-    )
+    result_diffs = pd.DataFrame(diffs.tolist(), columns=[" = ".join(["t", str(time)]) for time in timestamps])
     result_meta = pd.DataFrame(
         {
-            "variable_str": [
-                " = ".join(pair) for pair in zip(variable_names, new_observation_f)
-            ],
+            "variable_str": [" = ".join(pair) for pair in zip(variable_names, new_observation_f)],
             "variable_name": variable_names,
             "variable_value": new_observation.loc[:, variable_names].values.reshape(
                 -1,
@@ -283,28 +275,22 @@ def get_single_random_path(
     return pd.concat([result_meta, result_diffs], axis=1)
 
 
-def prepare_result_df(new_observation, variable_names, 
-                      shap_values, timestamps, aggregation_method):
+def prepare_result_df(new_observation, variable_names, shap_values, timestamps, aggregation_method):
     new_observation_f = new_observation.apply(lambda x: nice_format(x.iloc[0]))
-    result_shap = pd.DataFrame(
-        shap_values, columns=[" = ".join(["t", str(time)]) for time in timestamps]
-        )
+    result_shap = pd.DataFrame(shap_values, columns=[" = ".join(["t", str(time)]) for time in timestamps])
     result_meta = pd.DataFrame(
         {
-            "variable_str": [
-                " = ".join(pair) for pair in zip(variable_names, new_observation_f)
-            ],
+            "variable_str": [" = ".join(pair) for pair in zip(variable_names, new_observation_f)],
             "variable_name": variable_names,
             "variable_value": new_observation.values.reshape(
                 -1,
             ),
             "B": 0,
-            "aggregated_change": aggregate_change(
-                result_shap, aggregation_method, timestamps
-            ),
+            "aggregated_change": aggregate_change(result_shap, aggregation_method, timestamps),
         }
     )
     return pd.concat([result_meta, result_shap], axis=1)
+
 
 def aggregate_change(average_changes, aggregation_method, timestamps):
     if aggregation_method == "sum_of_squares":
@@ -372,9 +358,7 @@ def check_new_observation(new_observation, explainer):
 
         new_observation_.columns = explainer.data.columns
     else:
-        raise TypeError(
-            "new_observation must be a numpy.ndarray or pandas.Series or pandas.DataFrame"
-        )
+        raise TypeError("new_observation must be a numpy.ndarray or pandas.Series or pandas.DataFrame")
 
     if pd.api.types.is_bool_dtype(new_observation_.index):
         raise ValueError("new_observation index is of boolean type")

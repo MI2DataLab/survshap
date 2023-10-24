@@ -1,11 +1,21 @@
 [build-system]
-requires = ["hatchling"]
+requires = [
+    "hatchling",
+    "scikit-survival>=0.17.2",
+    "pandas>=1.2.5",
+    "numpy>=1.20.3",
+    "scipy>=1.6.3",
+    "plotly>=5.1.0",
+    "tqdm>=4.61.2",
+    "statsmodels>=0.13.2",
+    "shap>0.41.0"
+]
 build-backend = "hatchling.build"
 
 
 [project]
 name = "survshap"
-version = "1.0.0"
+version = "0.4.0"
 authors = [
   { name="Mateusz Krzyziński", email="krzyzinskimateusz23@gmail.com" },
   { name="Mikołaj Spytek" },
@@ -15,6 +25,16 @@ authors = [
 description = "Implementation of the SurvSHAP(t) explanation method for time-dependent explainability of machine learning survival models"
 readme = "README.md"
 requires-python = ">=3.7"
+dependencies = [
+    "scikit-survival>=0.17.2",
+    "pandas>=1.2.5",
+    "numpy>=1.20.3",
+    "scipy>=1.6.3",
+    "plotly>=5.1.0",
+    "tqdm>=4.61.2",
+    "statsmodels>=0.13.2",
+    "shap>0.41.0"
+]
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
