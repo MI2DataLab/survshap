@@ -545,7 +545,7 @@ def model_plot_shap_lines_for_variables(
 
     df_prepared_to_plot = (
         full_result_copy.groupby(["variable_name", "variable_value"])
-        .mean()
+        .mean(numeric_only=True)
         .reset_index()
     )
 
