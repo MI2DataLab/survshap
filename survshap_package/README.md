@@ -10,15 +10,15 @@ Read more about SurvSHAP(t) [here](https://doi.org/10.1016/j.knosys.2022.110234)
 
 If you use this package, please cite our paper:
     
-    ```
-    @article{survshap,
-        title = {SurvSHAP(t): Time-dependent explanations of machine learning survival models},
-        journal = {Knowledge-Based Systems},
-        volume = {262},
-        pages = {110234},
-        year = {2023},
-        issn = {0950-7051}
-        }
-    ```
+```bib
+@article{survshap,
+    title = {SurvSHAP(t): Time-dependent explanations of machine learning survival models},
+    journal = {Knowledge-Based Systems},
+    volume = {262},
+    pages = {110234},
+    year = {2023},
+    issn = {0950-7051}
+    }
+```
 
 ## Installation
