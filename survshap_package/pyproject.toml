@@ -1,0 +1,26 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+
+[project]
+name = "survshap"
+version = "1.0.0"
+authors = [
+  { name="Mateusz Krzyziński", email="krzyzinskimateusz23@gmail.com" },
+  { name="Mikołaj Spytek" },
+  { name="Hubert Baniecki" },
+  { name="Przemysław Biecek" }
+]
+description = "Implementation of the SurvSHAP(t) explanation method for time-dependent explainability of machine learning survival models"
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/MI2DataLab/survshap"
+"Bug Tracker" = "https://github.com/MI2DataLab/survshap/issues"
