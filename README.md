@@ -19,7 +19,7 @@ M. Krzyziński, M. Spytek, H. Baniecki, P. Biecek. *SurvSHAP(t): Time-dependent 
 
 
 ## Implementations
-In the `survshap_package` directory, you will find the code for *survshap* Python package, which contains the implementation of the SurvSHAP(t) method. **Now you can also easily install it from PyPI:**
+In the `survshap_package` directory, you will find the code for *survshap* Python package, which contains the implementation of the SurvSHAP(t) method. **Now you can also easily install it from [PyPI](https://pypi.org/project/survshap/):**
 ```
 pip install survshap
 ```
