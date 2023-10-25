@@ -1,14 +1,13 @@
-from copy import deepcopy
-from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 
-from survshap.predict_explanations.utils import prepare_result_df
+from ..predict_explanations.utils import prepare_result_df
 from ..predict_explanations.object import PredictSurvSHAP
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 from statsmodels.graphics.functional import fboxplot
 from scipy.integrate import trapezoid
+from sksurv.ensemble import RandomSurvivalForest
 import shap
 import warnings
 
@@ -28,28 +27,56 @@ def calculate_individual_explanations(
 ):
     individual_explanations = []
     concatenated_results = pd.DataFrame()
-    
     preds = explainer.predict(explainer.data, function_type)
+
     if timestamps is None:
         timestamps = preds[0].x
         preds = [f.y for f in preds]
     else:
-        preds = [f(timestamps) for f in preds]
+        if calculation_method == "treeshap":
+            if not isinstance(explainer.model, RandomSurvivalForest):
+                raise TypeError("explained model must be of class sksurv.ensemble.RandomSurvivalForest")
+            warnings.warn(
+                "timestamps are ignored for calculation_method = 'treeshap' \n SurvSHAP(t) values are calculated for explainer.model.unique_times_"
+            )
+            timestamps = explainer.model.unique_times_
+            preds = [f.y for f in preds]
+        else:
+            preds = [f(timestamps) for f in preds]
+
     baseline_f = np.mean(preds, axis=0)
 
+    if calculation_method in ["shap_kernel", "treeshap"]:
+        if calculation_method == "shap_kernel":
 
-    if calculation_method == "shap":
-        def predict_function(X):
-            all_functions = explainer.predict(X, function_type)
-            preds = np.array([f(timestamps) for f in all_functions])
-            return preds
+            def predict_function(X):
+                all_functions = explainer.predict(X, function_type)
+                preds = np.array([f(timestamps) for f in all_functions])
+                return preds
 
-        # as shap convert pd.DataFrame to np.array 
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=UserWarning)
-            exp = shap.KernelExplainer(predict_function, explainer.data, **kwargs)
-            res = exp.shap_values(new_observations)
-        tmp = np.dstack(res).flatten()
+            # as shap convert pd.DataFrame to np.array
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", category=UserWarning)
+                exp = shap.KernelExplainer(predict_function, explainer.data, **kwargs)
+                res = exp.shap_values(new_observations)
+            tmp = np.dstack(res).flatten()
+
+        elif calculation_method == "treeshap":
+            if function_type == "sf":
+                start_index = 1
+            elif function_type == "chf":
+                start_index = 0
+
+            n_estimators = len(explainer.model.estimators_)
+            tree_ensemble_model = {"trees": [estimator.tree_ for estimator in explainer.model.estimators_]}
+
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", category=UserWarning)
+                exp = shap.TreeExplainer(tree_ensemble_model, explainer.data, **kwargs)
+                res = exp.shap_values(new_observations)
+            res = res[start_index::2]
+            tmp = np.dstack(res).flatten() / n_estimators
+
         new_observations_shape = new_observations.shape
         tmp = tmp.reshape(new_observations_shape[0] * new_observations_shape[1], len(timestamps))
         variable_names = explainer.data.columns
@@ -61,10 +88,14 @@ def calculate_individual_explanations(
                 aggregation_method=aggregation_method,
                 random_state=random_state,
             )
-            survSHAP_obj.result = prepare_result_df(new_observations.iloc[[i]], variable_names, 
-                                                    tmp[(new_observations_shape[1]*i):(new_observations_shape[1]*(i+1)), :],
-                                                    timestamps, aggregation_method)
-            survSHAP_obj.predicted_function = explainer.predict(new_observations, function_type)[0](timestamps)
+            survSHAP_obj.result = prepare_result_df(
+                new_observations.iloc[[i]],
+                variable_names,
+                tmp[(new_observations_shape[1] * i) : (new_observations_shape[1] * (i + 1)), :],
+                timestamps,
+                aggregation_method,
+            )
+            survSHAP_obj.predicted_function = preds[i]
             survSHAP_obj.baseline_function = baseline_f
             survSHAP_obj.timestamps = timestamps
             if save_individual_explanations:
@@ -94,13 +125,7 @@ def calculate_individual_explanations(
 
 
 def create_boxplot_with_outliers(variable, full_result, wfactor=3):
-    boxplot_data = (
-        full_result[
-            (full_result["variable_name"] == variable) & (full_result["B"] == 0)
-        ]
-        .iloc[:, 6:]
-        .values
-    )
+    boxplot_data = full_result[(full_result["variable_name"] == variable) & (full_result["B"] == 0)].iloc[:, 6:].values
     fbxplt = fboxplot(boxplot_data, wfactor=wfactor)
     plt.close()
     outliers_ids = fbxplt[3]

@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.ticker
 import plotly.subplots
 import plotly.graph_objects
+import itertools
 from .utils import calculate_risk_table
 
 
@@ -32,9 +33,7 @@ def insert_zeros_to_line(x_vals, y_vals, baseline_function):
     to_put_baseline_function = (bsf1 * abs(y2) + bsf2 * abs(y1)) / (abs(y1) + abs(y2))
     new_x = np.insert(x_vals, put_zero + 1, to_put_x)
     new_y = np.insert(y_vals, put_zero + 1, 0)
-    new_baseline_function = np.insert(
-        baseline_function, put_zero + 1, to_put_baseline_function
-    )
+    new_baseline_function = np.insert(baseline_function, put_zero + 1, to_put_baseline_function)
 
     return new_x, new_y, new_baseline_function
 
@@ -60,7 +59,6 @@ def predict_plot(
     title=None,
     show=True,
 ):
-
     # get averaged shap values
     final_result = result[result["B"] == 0]
     if kind == "ratio":
@@ -74,24 +72,22 @@ def predict_plot(
 
     # choose variables
     if variables is not None:
-        df_prepared_to_plot = final_result[
-            final_result["variable_name"].isin(variables)
-        ].copy()
+        df_prepared_to_plot = final_result[final_result["variable_name"].isin(variables)].copy()
     else:
-        df_prepared_to_plot = final_result.iloc[:max_vars].copy()
+        df_prepared_to_plot = (
+            final_result.sort_values("aggregated_change", ascending=False).iloc[:max_vars].reset_index(drop=True).copy()
+        )
 
     # add tooltips
-    df_prepared_to_plot["tooltip_text"] = df_prepared_to_plot.apply(
-        lambda row: tooltip_text(row), axis=1
-    )
+    df_prepared_to_plot["tooltip_text"] = df_prepared_to_plot.apply(lambda row: tooltip_text(row), axis=1)
 
-    fig = plotly.subplots.make_subplots(
-        rows=2, cols=1, print_grid=False, shared_xaxes=True
-    )
+    fig = plotly.subplots.make_subplots(rows=2, cols=1, print_grid=False, shared_xaxes=True)
 
     max_y, min_y = -1, 1
 
+    # base/background function
     if add_to_baseline:
+        # average sf
         fig.add_trace(
             plotly.graph_objs.Scatter(
                 x=timestamps,
@@ -99,9 +95,7 @@ def predict_plot(
                 mode="lines",
                 line_color="#4378bf",
                 line_width=3,
-                hovertemplate="<b>Average SF</b><br>"
-                + "Time: %{x}<br>"
-                + "Avg SF value: %{y:.6f}<extra></extra>",
+                hovertemplate="<b>Average SF</b><br>" + "Time: %{x}<br>" + "Avg SF value: %{y:.6f}<extra></extra>",
                 hoverinfo="text",
             ),
             row=1,
@@ -110,6 +104,7 @@ def predict_plot(
         max_y, min_y = check_y_range(max_y, min_y, baseline_function)
 
     else:
+        # average sf as 0
         fig.add_trace(
             plotly.graph_objs.Scatter(
                 x=timestamps,
@@ -118,69 +113,40 @@ def predict_plot(
                 line_color="#4378bf",
                 line_width=3,
                 text=baseline_function,
-                hovertemplate="<b>Average SF</b><br>"
-                + "Time: %{x}<br>"
-                + "Avg SF value: %{text:.6f}<extra></extra>",
+                hovertemplate="<b>Average SF</b><br>" + "Time: %{x}<br>" + "Avg SF value: %{text:.6f}<extra></extra>",
                 hoverinfo="text",
             ),
             row=1,
             col=1,
         )
 
-    start_idx_preds = np.where(df_prepared_to_plot.columns == f"t = {timestamps[0]}")[
-        0
-    ][0]
-    keyword = (
-        "SF value: "
-        if add_to_baseline
-        else "SHAP value: "
-        if kind == "default"
-        else "normalized SHAP value: "
-    )
+    start_idx_preds = np.where(df_prepared_to_plot.columns == f"t = {timestamps[0]}")[0][0]
+    keyword = "SF value: " if add_to_baseline else "SHAP value: " if kind == "default" else "normalized SHAP value: "
+
+    # SurvSHAP(t) curves for different variables
+
+    # prepare colors
+    colors = ["#46bac2", "#ae2c87", "#ffa58c", "#8bdcbe", "#f05a71", "#FED61E", "#FED61E"]
+    colors = itertools.cycle(colors)
+
     for index, row in df_prepared_to_plot.iterrows():
         x_vals = timestamps
         y_vals = row[start_idx_preds:-1].values
 
-        new_x, new_y, new_baseline_function = insert_zeros_to_line(
-            x_vals, y_vals, baseline_function
-        )
-
         fig.add_trace(
             plotly.graph_objs.Scatter(
-                x=new_x,
-                y=new_y + new_baseline_function if add_to_baseline else new_y,
+                x=x_vals,
+                y=y_vals + baseline_function if add_to_baseline else y_vals,
                 mode="lines",
-                line_color="#8bdcbe",
-                hovertemplate=row["tooltip_text"]
-                + "Time: %{x}<br>"
-                + keyword
-                + "%{y:.6f}<extra></extra>",
-                hoverinfo="text",
-            ),
-            row=1,
-            col=1,
-        )
-        fig.add_trace(
-            plotly.graph_objs.Scatter(
-                x=new_x[new_y <= 0],
-                y=new_y[new_y <= 0] + new_baseline_function[new_y <= 0]
-                if add_to_baseline
-                else new_y[new_y <= 0],
-                mode="lines",
-                line_color="#f05a71",
-                hovertemplate=row["tooltip_text"]
-                + "Time: %{x}<br>"
-                + keyword
-                + "%{y:.6f}<extra></extra>",
+                line_color=next(colors),
+                hovertemplate=row["tooltip_text"] + "Time: %{x}<br>" + keyword + "%{y:.6f}<extra></extra>",
                 hoverinfo="text",
             ),
             row=1,
             col=1,
         )
         new_vector = (
-            row[start_idx_preds:-1].values + baseline_function
-            if add_to_baseline
-            else row[start_idx_preds:-1].values
+            row[start_idx_preds:-1].values + baseline_function if add_to_baseline else row[start_idx_preds:-1].values
         )
         max_y, min_y = check_y_range(max_y, min_y, new_vector)
 
@@ -209,17 +175,13 @@ def predict_plot(
                 mode="lines",
                 line_color="#371ea3",
                 line_width=3,
-                hovertemplate="<b>SF change</b><br>"
-                + "Time: %{x}<br>"
-                + "SF change: %{y:.6f}<extra></extra>",
+                hovertemplate="<b>SF change</b><br>" + "Time: %{x}<br>" + "SF change: %{y:.6f}<extra></extra>",
                 hoverinfo="text",
             ),
             row=1,
             col=1,
         )
-        max_y, min_y = check_y_range(
-            max_y, min_y, predicted_function - baseline_function
-        )
+        max_y, min_y = check_y_range(max_y, min_y, predicted_function - baseline_function)
 
     min_y = min_y - 0.05 * abs(min_y)
     max_y = max_y + 0.05 * abs(max_y)
@@ -247,14 +209,10 @@ def predict_plot(
     if x_range is None:
         x_range = [min(timestamps) - max(timestamps) * 0.025, max(timestamps) * 1.025]
 
-    ticker = matplotlib.ticker.MaxNLocator(
-        nbins=10, min_n_ticks=4, integer=True, prune="upper"
-    )
+    ticker = matplotlib.ticker.MaxNLocator(nbins=10, min_n_ticks=4, integer=True, prune="upper")
     ticks = ticker.tick_values(x_range[0], x_range[1])
     if show_risk_table:
-        n_at_risk, n_events, n_censored = calculate_risk_table(
-            ticks, event_times, event_inds
-        )
+        n_at_risk, n_events, n_censored = calculate_risk_table(ticks, event_times, event_inds)
         fig.append_trace(
             plotly.graph_objs.Scatter(
                 x=ticks,

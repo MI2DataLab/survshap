@@ -1,13 +1,10 @@
-from .plot import (
-    model_plot_mean_abs_shap_values,
-    model_plot_shap_lines_for_all_individuals,
-    model_plot_shap_lines_for_variables,
-)
+from .plot import model_plot_mean_abs_shap_values, model_plot_shap_lines_for_all_individuals
 import pandas as pd
 import numpy as np
 import pandas as pd
 from .utils import aggregate_change, calculate_individual_explanations
 import warnings
+
 
 class ModelSurvSHAP:
     def __init__(
@@ -20,10 +17,10 @@ class ModelSurvSHAP:
         random_state=None,
     ):
         """Constructor for class ModelSurvSHAP
-        
+
         Args:
             function_type (str, optional): Either "sf" representing survival function or "chf" representing cumulative hazard function. Type of function to be evaluated for explanation. Defaults to "sf".
-            calculation_method (str, optional): Chooses type of survSHAP calculation. "shap" for shap.KernelExplainer, "kernel" for exact KernelSHAP, or "sampling" for sampling method. Defaults to "kernel".
+            calculation_method (str, optional): Chooses the method for SurvSHAP(t) calculation. "shap_kernel" for shap.KernelExplainer, "kernel" for exact KernelSHAP, "sampling" for sampling method, or "treeshap" for shap.TreeExplainer. Defaults to "kernel".
             aggregation_method (str, optional): One of "sum_of_squares", "max_abs", "mean_abs" or "integral". Type of method  Defaults to "integral".
             path (list of int or str, optional): If specified, then attributions for this path will be plotted. Defaults to "average".
             B (int, optional): Number of random paths to calculate variable attributions. Defaults to 25.
@@ -44,25 +41,29 @@ class ModelSurvSHAP:
 
     def _repr_html_(self):
         return self.result[self.result["B"] == 0]._repr_html_()
-     
+
     def fit(self, explainer, new_observations=None, timestamps=None, save_individual_explanations=True, **kwargs):
         """Calculate SurvSHAP(t) for many new observations and aggregate results.
 
         Args:
             explainer (SurvivalModelExplainer): A wrapper object for the model to be explained.
-            new_observations (pandas.DataFrame, optional): A DataFrame containing the observations to be explained. If None observations from explainer are explained. Defaults to None. 
+            new_observations (pandas.DataFrame, optional): A DataFrame containing the observations to be explained. If None observations from explainer are explained. Defaults to None.
             timestamps (numpy.Array, optional): An array of timestamps at which SurvSHAP(t) values should be calculated. Defaults to None.
             save_individual_explanations (bool, optional): Whether to save PredictSurvSHAP objects (explanations for individual observations). Defaults to True.
-            **kwargs (optional): Additional parameters passed for shap.KernelExplainer. 
+            **kwargs (optional): Additional parameters passed for shap.KernelExplainer.
         """
         # based on original shap warning
         data_len = len(explainer.data)
-        
-        if data_len > 100 and self.calculation_method != "shap":
-            warnings.warn("Using " + str(data_len) + " background data samples could cause slower run times.\n" +
-                          "Consider using a smaller sample.")
-            
-        if new_observations is None: 
+
+        if data_len > 100 and self.calculation_method != "treeshap":
+            warnings.warn(
+                "Using "
+                + str(data_len)
+                + " background data samples could cause slower run times.\n"
+                + "Consider using a smaller sample."
+            )
+
+        if new_observations is None:
             new_observations = explainer.data
 
         (
@@ -97,9 +98,7 @@ class ModelSurvSHAP:
             .reset_index()
         )
 
-        result["aggregated_change"] = aggregate_change(
-            result.iloc[:, 5:], self.aggregation_method, self.timestamps
-        )
+        result["aggregated_change"] = aggregate_change(result.iloc[:, 5:], self.aggregation_method, self.timestamps)
         result = result.sort_values("aggregated_change", ascending=False)
         self.result = result
 
@@ -117,9 +116,7 @@ class ModelSurvSHAP:
             .reset_index()
         )
 
-        result["aggregated_change"] = aggregate_change(
-            result.iloc[:, 5:], aggregation_method, self.timestamps
-        )
+        result["aggregated_change"] = aggregate_change(result.iloc[:, 5:], aggregation_method, self.timestamps)
         result = result.sort_values("aggregated_change", ascending=False)
         self.result = result
 
@@ -160,7 +157,6 @@ class ModelSurvSHAP:
         show=True,
         title=None,
     ):
-
         return model_plot_shap_lines_for_all_individuals(
             self.full_result,
             self.timestamps,
@@ -171,34 +167,6 @@ class ModelSurvSHAP:
             kind,
             boxplot,
             wfactor,
-            show_risk_table,
-            show,
-            title,
-        )
-
-    def plot_shap_lines_for_variables(
-        self,
-        variables,
-        to_discretize=[],
-        discretization_method="quantile",  # TODO add uniform, kmeans
-        n_bins=4,
-        x_range=None,
-        kind="default",
-        show_risk_table=True,
-        show=True,
-        title=None,
-    ):
-        return model_plot_shap_lines_for_variables(
-            self.full_result,
-            self.timestamps,
-            self.event_ind,
-            self.event_times,
-            variables,
-            to_discretize,
-            discretization_method,
-            n_bins,
-            x_range,
-            kind,
             show_risk_table,
             show,
             title,

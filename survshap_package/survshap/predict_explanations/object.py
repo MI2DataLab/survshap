@@ -2,7 +2,7 @@ from .plot import predict_plot
 import pandas as pd
 import numpy as np
 import pandas as pd
-from .utils import check_new_observation, shap_kernel, shap_sampling, shap_kernel_explainer
+from .utils import check_new_observation, shap_kernel, shap_sampling, shap_kernel_explainer, shap_tree_explainer
 
 
 class PredictSurvSHAP:
@@ -20,7 +20,7 @@ class PredictSurvSHAP:
 
         Args:
             function_type (str, optional): Either "sf" representing survival function or "chf" representing cumulative hazard function. Type of function to be evaluated for explanation. Defaults to "sf".
-            calculation_method (str, optional): Chooses type of survSHAP calculation. "shap" for shap.KernelExplainer, "kernel" for exact KernelSHAP, or "sampling" for sampling method. Defaults to "kernel".
+            calculation_method (str, optional): Chooses the method for SurvSHAP(t) calculation. "shap_kernel" for shap.KernelExplainer, "kernel" for exact KernelSHAP, "sampling" for sampling method, or "treeshap" for shap.TreeExplainer. Defaults to "kernel".
             aggregation_method (str, optional): One of "sum_of_squares", "max_abs", "mean_abs" or "integral". Type of method  Defaults to "integral".
             path (list of int or str, optional): If specified, then attributions for this path will be plotted. Defaults to "average".
             B (int, optional): Number of random paths to calculate variable attributions. Defaults to 25.
@@ -99,7 +99,7 @@ class PredictSurvSHAP:
                 timestamps,
                 self.exact,
             )
-        elif self.calculation_method == "shap":
+        elif self.calculation_method == "shap_kernel":
             (
                 self.result,
                 self.predicted_function,
@@ -112,8 +112,22 @@ class PredictSurvSHAP:
                 self.aggregation_method,
                 timestamps,
             )
+        elif self.calculation_method == "treeshap":
+            (
+                self.result,
+                self.predicted_function,
+                self.baseline_function,
+                self.timestamps,
+            ) = shap_tree_explainer(
+                explainer,
+                new_observation,
+                self.function,
+                self.aggregation_method,
+                timestamps,
+                treeshap=True,
+            )
         else:
-            raise ValueError("calculation_method should be 'kernel' or 'sampling'")
+            raise ValueError("calculation_method should be 'kernel', 'sampling', 'shap_kernel', or 'treeshap'")
 
         self.simplified_result = self.result[self.result["B"] == 0].iloc[:, 1:5]
 
