@@ -86,7 +86,7 @@ def model_plot_mean_abs_shap_values(
 
     for index, row in df_prepared_to_plot.iterrows():
         y_vals = row[5:].values
-
+        varval = row["variable_value"]
         fig.add_trace(
             plotly.graph_objs.Scatter(
                 x=timestamps,
@@ -97,8 +97,7 @@ def model_plot_mean_abs_shap_values(
                 hovertemplate="<b>"
                 + str(row["variable_name"])
                 + "</b><br>"
-                + "(Avg) variable value: "
-                + str(row["variable_value"])
+                + f"(Avg) variable value: {varval:.6f}"
                 + "<br>"
                 "Time: %{x}<br>" + keyword + "%{y:.6f}<extra></extra>",
                 hoverinfo="text",
