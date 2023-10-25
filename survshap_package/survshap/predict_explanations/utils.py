@@ -19,7 +19,7 @@ def shap_tree_explainer(explainer, new_observation, function_type, aggregation_m
     timestamps = explainer.model.unique_times_
 
     if not isinstance(explainer.model, RandomSurvivalForest):
-        raise TypeError("explainer must be of class sksurv.ensemble.RandomSurvivalForest")
+        raise TypeError("explained model must be of class sksurv.ensemble.RandomSurvivalForest")
 
     if function_type == "sf":
         start_index = 1

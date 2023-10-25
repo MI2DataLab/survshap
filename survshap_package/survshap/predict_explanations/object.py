@@ -20,7 +20,7 @@ class PredictSurvSHAP:
 
         Args:
             function_type (str, optional): Either "sf" representing survival function or "chf" representing cumulative hazard function. Type of function to be evaluated for explanation. Defaults to "sf".
-            calculation_method (str, optional): Chooses type of survSHAP calculation. "shap" for shap.KernelExplainer, "kernel" for exact KernelSHAP, or "sampling" for sampling method. Defaults to "kernel".
+            calculation_method (str, optional): Chooses the method for SurvSHAP(t) calculation. "shap_kernel" for shap.KernelExplainer, "kernel" for exact KernelSHAP, "sampling" for sampling method, or "treeshap" for shap.TreeExplainer. Defaults to "kernel".
             aggregation_method (str, optional): One of "sum_of_squares", "max_abs", "mean_abs" or "integral". Type of method  Defaults to "integral".
             path (list of int or str, optional): If specified, then attributions for this path will be plotted. Defaults to "average".
             B (int, optional): Number of random paths to calculate variable attributions. Defaults to 25.
