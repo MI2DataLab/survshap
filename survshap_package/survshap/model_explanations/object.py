@@ -1,8 +1,4 @@
-from .plot import (
-    model_plot_mean_abs_shap_values,
-    model_plot_shap_lines_for_all_individuals,
-    model_plot_shap_lines_for_variables,
-)
+from .plot import model_plot_mean_abs_shap_values, model_plot_shap_lines_for_all_individuals
 import pandas as pd
 import numpy as np
 import pandas as pd
