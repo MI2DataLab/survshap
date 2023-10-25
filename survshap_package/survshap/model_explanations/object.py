@@ -175,31 +175,3 @@ class ModelSurvSHAP:
             show,
             title,
         )
-
-    def plot_shap_lines_for_variables(
-        self,
-        variables,
-        to_discretize=[],
-        discretization_method="quantile",  # TODO add uniform, kmeans
-        n_bins=4,
-        x_range=None,
-        kind="default",
-        show_risk_table=True,
-        show=True,
-        title=None,
-    ):
-        return model_plot_shap_lines_for_variables(
-            self.full_result,
-            self.timestamps,
-            self.event_ind,
-            self.event_times,
-            variables,
-            to_discretize,
-            discretization_method,
-            n_bins,
-            x_range,
-            kind,
-            show_risk_table,
-            show,
-            title,
-        )
