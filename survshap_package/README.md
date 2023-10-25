@@ -9,9 +9,12 @@ The `survshap` package contains an implementation of the **SurvSHAP(t)** method,
 Read more about SurvSHAP(t) in [our paper](https://doi.org/10.1016/j.knosys.2022.110234).
 
 ## Installation
-```python
+**You can install the package from [PyPI](https://pypi.org/project/survshap/):**
+```
 pip install survshap
 ```
+
+**NOTE:** SurvSHAP(t) is also implemented in the [*survex*](https://github.com/ModelOriented/survex) R package, along with many more explanation methods for survival models. *survex* offers explanations for *scikit-survival* models loaded into R via the *reticulate* package.
 
 ## Citation
 If you use this package, please cite our paper:
