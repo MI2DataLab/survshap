@@ -13,9 +13,9 @@ class PredictSurvSHAP:
         aggregation_method="integral",
         path="average",
         B=25,
+        max_shap_value_inputs=np.inf,
         random_state=None,
         exact=False,
-        max_shap_value_inputs=np.inf
     ):
         """Constructor for class PredictSurvSHAP
 
@@ -25,6 +25,7 @@ class PredictSurvSHAP:
             aggregation_method (str, optional): One of "sum_of_squares", "max_abs", "mean_abs" or "integral". Type of method  Defaults to "integral".
             path (list of int or str, optional): If specified, then attributions for this path will be plotted. Defaults to "average".
             B (int, optional): Number of random paths to calculate variable attributions. Defaults to 25.
+            max_shap_value_inputs (int, optional): Maximum number of simplified inputs to be used for SurvSHAP(t) calculation. Defaults to np.inf (no limit). Lower values can be used to speed up calculation.
             random_state (int, optional): Set seed for random number generator. Defaults to None.
             exact (bool, optional): Calculates all paths. If this is set to True parameter B is overriden. Defaults to False.
         """
@@ -83,7 +84,7 @@ class PredictSurvSHAP:
                 self.function,
                 self.aggregation_method,
                 timestamps,
-                self.max_shap_value_inputs
+                self.max_shap_value_inputs,
             )
         elif self.calculation_method == "sampling":
             (
