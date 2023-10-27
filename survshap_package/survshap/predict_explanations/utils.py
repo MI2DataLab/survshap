@@ -76,7 +76,9 @@ def shap_kernel_explainer(explainer, new_observation, function_type, aggregation
     return result, target_fun, baseline_fun, timestamps
 
 
-def shap_kernel(explainer, new_observation, function_type, aggregation_method, timestamps):
+def shap_kernel(
+    explainer, new_observation, function_type, aggregation_method, timestamps, max_shap_value_inputs=np.inf
+):
     p = new_observation.shape[1]
 
     # only one new_observation allowed
@@ -92,7 +94,14 @@ def shap_kernel(explainer, new_observation, function_type, aggregation_method, t
         all_functions_vals = [f(timestamps) for f in all_functions]
     baseline_f = np.mean(all_functions_vals, axis=0)
 
-    simplified_inputs = [list(z) for z in itertools.product(range(2), repeat=p)]
+    if 2**p < max_shap_value_inputs:
+        simplified_inputs = [list(z) for z in itertools.product(range(2), repeat=p)]
+    else:
+        simplified_inputs = list(np.random.randint(0, 2, size=(max_shap_value_inputs, p)))
+        print(
+            f"Approximate Survival Shapley will sample only {max_shap_value_inputs} values instead of 2**{p} for Exact Shapley"
+        )
+
     kernel_weights = generate_shap_kernel_weights(simplified_inputs, p)
     shap_values, r2 = calculate_shap_values(
         explainer,

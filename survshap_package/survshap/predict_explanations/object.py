@@ -15,6 +15,7 @@ class PredictSurvSHAP:
         B=25,
         random_state=None,
         exact=False,
+        max_shap_value_inputs=np.inf
     ):
         """Constructor for class PredictSurvSHAP
 
@@ -44,6 +45,7 @@ class PredictSurvSHAP:
         self.y_true_time = None  # for this instance
         self.y_true_ind = None  # for this instance
         self.r2 = None
+        self.max_shap_value_inputs = max_shap_value_inputs
 
     def _repr_html_(self):
         return self.simplified_result._repr_html_()
@@ -81,6 +83,7 @@ class PredictSurvSHAP:
                 self.function,
                 self.aggregation_method,
                 timestamps,
+                self.max_shap_value_inputs
             )
         elif self.calculation_method == "sampling":
             (

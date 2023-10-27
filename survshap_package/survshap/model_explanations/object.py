@@ -14,6 +14,7 @@ class ModelSurvSHAP:
         aggregation_method="integral",
         path="average",
         B=25,
+        max_shap_value_inputs=np.inf,
         random_state=None,
     ):
         """Constructor for class ModelSurvSHAP
@@ -24,6 +25,7 @@ class ModelSurvSHAP:
             aggregation_method (str, optional): One of "sum_of_squares", "max_abs", "mean_abs" or "integral". Type of method  Defaults to "integral".
             path (list of int or str, optional): If specified, then attributions for this path will be plotted. Defaults to "average".
             B (int, optional): Number of random paths to calculate variable attributions. Defaults to 25.
+            max_shap_value_inputs (int, optional): Maximum number of simplified inputs to be used for SurvSHAP(t) calculation. Defaults to np.inf (no limit). Lower values can be used to speed up calculation.
             random_state (int, optional): Set seed for random number generator. Defaults to None.
         """
         self.explainer = None
@@ -32,6 +34,7 @@ class ModelSurvSHAP:
         self.aggregation_method = aggregation_method
         self.path = path
         self.B = B
+        self.max_shap_value_inputs = max_shap_value_inputs
         self.result = pd.DataFrame()
         self.timestamps = None
         self.random_state = random_state
@@ -76,6 +79,7 @@ class ModelSurvSHAP:
             self.function_type,
             self.path,
             self.B,
+            self.max_shap_value_inputs,
             self.random_state,
             self.calculation_method,
             self.aggregation_method,
