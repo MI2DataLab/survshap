@@ -29,3 +29,38 @@ If you use this package, please cite our paper:
     issn = {0950-7051}
     }
 ```
+
+## Basic usage
+```python
+# import packages and load data
+from survshap import SurvivalModelExplainer, PredictSurvSHAP, ModelSurvSHAP
+from sksurv.ensemble import RandomSurvivalForest # or any other survival model
+# X, y - data
+
+# prepare survival model
+model = RandomSurvivalForest()
+model.fit(X, y)
+
+# create explainer
+explainer = SurvivalModelExplainer(model = model, data = X, y = y)
+
+# compute SHAP values for a single instance
+observation_A = X.iloc[[0]]
+survshap_A = PredictSurvSHAP()
+survshap_A.fit(explainer = explainer, new_observation = observation_A)
+
+survshap_A.result 
+survshap_A.plot()
+
+# compute SHAP values for a group of instances
+model_survshap = ModelSurvSHAP(calculation_method="treeshap") # fast implementation for tree-based models
+model_survshap.fit(explainer = explainer, new_observations = X)
+
+model_survshap.result
+model_survshap.plot_mean_abs_shap_values()
+model_survshap.plot_shap_lines_for_all_individuals(variable = "variable1")
+extracted_survshap = model_survshap.individual_explanations[0] # PredictSurvSHAP object
+```
+
+
+

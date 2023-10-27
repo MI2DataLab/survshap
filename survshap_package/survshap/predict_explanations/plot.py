@@ -7,7 +7,7 @@ from .utils import calculate_risk_table
 
 
 def tooltip_text(row):
-    return f"<b>{row.variable_name}</b><br>" + f"Value: {row.variable_value:.6f}<br>"
+    return f"<b>{row.variable_name}</b><br>" + f"Value: {float(row.variable_value):.6g}<br>"
 
 
 def check_y_range(max_y, min_y, new_vector):
@@ -74,9 +74,10 @@ def predict_plot(
     if variables is not None:
         df_prepared_to_plot = final_result[final_result["variable_name"].isin(variables)].copy()
     else:
-        df_prepared_to_plot = (
-            final_result.sort_values("aggregated_change", ascending=False).iloc[:max_vars].reset_index(drop=True).copy()
+        variables = (
+            final_result.sort_values("aggregated_change", key=abs, ascending=False).iloc[:max_vars].variable_name
         )
+        df_prepared_to_plot = final_result[final_result["variable_name"].isin(variables)].copy()
 
     # add tooltips
     df_prepared_to_plot["tooltip_text"] = df_prepared_to_plot.apply(lambda row: tooltip_text(row), axis=1)

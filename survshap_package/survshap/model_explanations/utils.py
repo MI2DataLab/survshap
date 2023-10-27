@@ -81,6 +81,10 @@ def calculate_individual_explanations(
         tmp = tmp.reshape(new_observations_shape[0] * new_observations_shape[1], len(timestamps))
         variable_names = explainer.data.columns
 
+        exp_y_names = explainer.y.dtype.names
+        event_inds = explainer.y[exp_y_names[0]]
+        event_times = explainer.y[exp_y_names[1]]
+
         for i in range(new_observations_shape[0]):
             survSHAP_obj = PredictSurvSHAP(
                 function_type=function_type,
@@ -95,9 +99,14 @@ def calculate_individual_explanations(
                 timestamps,
                 aggregation_method,
             )
+            survSHAP_obj.simplified_result = survSHAP_obj.result[survSHAP_obj.result["B"] == 0].iloc[:, 1:5]
             survSHAP_obj.predicted_function = preds[i]
             survSHAP_obj.baseline_function = baseline_f
             survSHAP_obj.timestamps = timestamps
+
+            survSHAP_obj.event_inds = event_inds
+            survSHAP_obj.event_times = event_times
+
             if save_individual_explanations:
                 individual_explanations.append(survSHAP_obj)
             tmp_results = survSHAP_obj.result

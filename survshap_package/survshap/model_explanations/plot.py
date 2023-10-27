@@ -256,13 +256,30 @@ def model_plot_shap_lines_for_all_individuals(
     show=True,
     title=None,
 ):
+    if variable not in full_result["variable_name"].unique():
+        raise ValueError("Variable not in the result")
     df_prepared_to_plot = full_result[full_result["variable_name"] == variable]
     df_prepared_to_plot = df_prepared_to_plot[df_prepared_to_plot["B"] == 0]
     if kind == "ratio":
         df_prepared_to_plot.iloc[:, 6:] = df_prepared_to_plot.iloc[:, 6:] / df_prepared_to_plot.iloc[:, 6:].abs().sum()
     df_prepared_to_plot = df_prepared_to_plot.reset_index(drop=True)
     if ~boxplot:
-        cmap = LinearSegmentedColormap.from_list("dalex", ["#c7f5bf", "#46bac2", "#371ea3"], N=100)
+        cmap = LinearSegmentedColormap.from_list(
+            "dalex",
+            [
+                "#8bdcbe",
+                "#77d1be",
+                "#61c5c0",
+                "#46bac2",
+                "#45a6c4",
+                "#4590c4",
+                "#4378bf",
+                "#415fb9",
+                "#3d42af",
+                "#371ea3",
+            ],
+            N=100,
+        )
         minima = np.min(df_prepared_to_plot["variable_value"])
         maxima = np.max(df_prepared_to_plot["variable_value"])
         norm = matplotlib.colors.Normalize(vmin=minima, vmax=maxima, clip=True)
