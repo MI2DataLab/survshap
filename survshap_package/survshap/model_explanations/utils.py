@@ -24,7 +24,7 @@ def calculate_individual_explanations(
     aggregation_method,
     timestamps,
     save_individual_explanations,
-    **kwargs
+    **kwargs,
 ):
     individual_explanations = []
     concatenated_results = pd.DataFrame()
@@ -74,7 +74,7 @@ def calculate_individual_explanations(
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", category=UserWarning)
                 exp = shap.TreeExplainer(tree_ensemble_model, explainer.data, **kwargs)
-                res = exp.shap_values(new_observations)
+                res = exp.shap_values(new_observations, **kwargs)
             res = res[start_index::2]
             tmp = np.dstack(res).flatten() / n_estimators
 
